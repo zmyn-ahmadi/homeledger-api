@@ -1,10 +1,8 @@
 using System.Text;
-using HomeLedger.API.Data;
-using HomeLedger.API.Models;
-using HomeLedger.API.Persistance.Repositories;
-using HomeLedger.API.Services.CategoryService;
+using HomeLedger.API.Middleware;
+using HomeLedger.API.Persistence;
+using HomeLedger.API.Persistence.Repositories.Interfaces;
 using HomeLedger.API.Services.Token;
-using HomeLedger.API.Services.UserServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -73,9 +71,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ----------------------------------------------
 // User Service
 // ----------------------------------------------
-builder.Services.AddScoped<IUserServices, UserServices>();
+// builder.Services.AddScoped<IUserServices, UserServices>();
+//
+// builder.Services.AddScoped<ICateogryService, CategoryService>();
 
-builder.Services.AddScoped<ICateogryService, CategoryService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // ----------------------------------------------
 // Jwt Service
