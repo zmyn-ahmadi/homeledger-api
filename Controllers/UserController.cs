@@ -1,6 +1,6 @@
 using HomeLedger.API.Dtos.User;
 using HomeLedger.API.Models;
-using HomeLedger.API.Services.UserServices;
+using HomeLedger.API.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

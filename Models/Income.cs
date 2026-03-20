@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeLedger.API.Models;
 
-public class Income
+public class Income : BaseAuditableEntity
 {
   [Key]
   public int IncomeId { get; set; }
@@ -21,8 +20,6 @@ public class Income
   public string? Description { get; set; }
   public bool IsRecurring { get; set; } = false;
   public RecurringFrequency RecurringFrequency { get; set; }
-  public DateTime CreatedAt { get; set; } = DateTime.Now;
-  public DateTime UpdatedAt { get; set; }
 
   // Relationships
 

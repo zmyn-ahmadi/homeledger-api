@@ -15,8 +15,7 @@ public class Budget : BaseAuditableEntity
   public int BudgetId { get; set; }
 
   [Required]
-  [Range(2, 10, ErrorMessage = "Amount must be between 2 and 10")]
-  [MinLength(0)]
+  [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be between 2 and 10")]
   public decimal Amount { get; set; }
 
   public Period Period { get; set; }

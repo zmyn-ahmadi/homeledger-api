@@ -32,5 +32,5 @@ public class Bill : BaseAuditableEntity
   public int CategoryId { get; set; }
   public virtual Category Category { get; set; } = null!;
 
-  public virtual ICollection<BillPayment> BillPayments { get; set; } = new HashSet<BillPayment>();
+  public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
 }
