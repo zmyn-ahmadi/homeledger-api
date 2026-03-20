@@ -1,0 +1,38 @@
+using HomeLedger.API.Persistence;
+using HomeLedger.API.Persistence.Repositories;
+using HomeLedger.API.Persistence.Repositories.Interfaces;
+
+public class UnitOfWork : IUnitOfWork
+{
+  private readonly HomeLedgerDbContext _context;
+  private readonly Dictionary<Type, object> _repositories = [];
+
+  public UnitOfWork(HomeLedgerDbContext context)
+  {
+    _context = context;
+    Categories = new CategoryRepository(_context);
+    Users = new UserRepository(_context);
+  }
+
+  public CategoryRepository Categories { get; }
+  public UserRepository Users { get; }
+
+  // Resolves a generic repo on-demand for any entity not needing a dedicated repo
+  public IRepository<T> Repository<T>()
+      where T : class
+  {
+    var type = typeof(T);
+    if (!_repositories.TryGetValue(type, out var repo))
+    {
+      repo = new Repository<T>(_context);
+      _repositories[type] = repo;
+    }
+    return (IRepository<T>)repo;
+  }
+
+  public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
+
+  public async Task RollbackAsync() => await _context.Database.RollbackTransactionAsync();
+
+  public void Dispose() => _context.Dispose();
+}
