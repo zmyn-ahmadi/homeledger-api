@@ -24,7 +24,7 @@ public class JwtService(IConfiguration config)
     var claims = new[]
     {
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new Claim(ClaimTypes.Email, user.Email!),
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim("IsSuperUser", user.IsSuperUser.ToString()),
@@ -62,7 +62,7 @@ public class JwtService(IConfiguration config)
       Token = token,
       Created = DateTime.UtcNow,
       Expiry = DateTime.UtcNow.AddDays(7),
-      UserId = user.Id,
+      UserId = user.UserId,
       User = user,
       IsRevoked = false,
     };

@@ -1,8 +1,8 @@
 using HomeLedger.API.Models;
 
-namespace HomeLedger.API.Services.CategoryService;
+namespace HomeLedger.API.Services.Categories;
 
-public interface ICateogryService
+public interface ICategoryService
 {
     Task<IEnumerable<Category>> GetAllAsync();
     Task<Category?> GetByIdAsync(int id);

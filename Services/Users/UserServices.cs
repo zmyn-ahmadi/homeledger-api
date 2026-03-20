@@ -1,9 +1,10 @@
-using HomeLedger.API.Data;
 using HomeLedger.API.Dtos.User;
 using HomeLedger.API.Models;
-using HomeLedger.API.Services.UserServices;
+using HomeLedger.API.Persistence;
 using HomeLedger.API.Utils;
 using Microsoft.EntityFrameworkCore;
+
+namespace HomeLedger.API.Services.Users;
 
 public class UserServices(HomeLedgerDbContext db) : IUserServices
 {
@@ -19,7 +20,7 @@ public class UserServices(HomeLedgerDbContext db) : IUserServices
     return await _db
         .Users.Select(u => new UserResponseDto
         {
-          Id = u.Id,
+          Id = u.UserId,
           UserName = u.UserName,
           FirstName = u.FirstName,
           LastName = u.LastName,
@@ -31,7 +32,7 @@ public class UserServices(HomeLedgerDbContext db) : IUserServices
   public async Task<UserResponseDto> GetUserAsync(int id)
   {
     // check if user exists
-    var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+    var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == id);
 
     if (user == null)
       return null!;
@@ -74,7 +75,6 @@ public class UserServices(HomeLedgerDbContext db) : IUserServices
       LastName = createUser.LastName,
       Password = passwordHash,
       Email = email,
-      DateJoined = DateTime.UtcNow,
       LastLogin = DateTime.UtcNow,
       IsSuperUser = false,
     };
@@ -94,7 +94,7 @@ public class UserServices(HomeLedgerDbContext db) : IUserServices
   public async Task<bool> DeleteUserAsync(int id)
   {
     // check if user exists
-    var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+    var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == id);
     if (user == null)
     {
       return false;
@@ -107,7 +107,7 @@ public class UserServices(HomeLedgerDbContext db) : IUserServices
   public async Task<bool> UpdateUserAsync(int id, UpdateRequestDto updateUser)
   {
     // check if user exists
-    var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+    var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == id);
 
     if (user == null)
     {
