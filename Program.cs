@@ -18,28 +18,28 @@ builder.Services.AddAuthorization();
 builder
     .Services.AddControllers(options =>
     {
-        options.ReturnHttpNotAcceptable = true;
+      options.ReturnHttpNotAcceptable = true;
     })
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+      options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc(
-        "v1",
-        new OpenApiInfo
-        {
-            Title = "HomeLedger API",
-            Version = "v1",
-            Description =
-                "HomeLedger API provides a complete backend for personal finance management.",
-            Contact = new OpenApiContact { Email = "zmnahm17@gmail.com", Name = "zmyn ahmadi" },
-        }
-    );
+  options.SwaggerDoc(
+      "v1",
+      new OpenApiInfo
+      {
+        Title = "HomeLedger API",
+        Version = "v1",
+        Description =
+              "HomeLedger API provides a complete backend for personal finance management.",
+        Contact = new OpenApiContact { Email = "zmnahm17@gmail.com", Name = "zmyn ahmadi" },
+      }
+  );
 });
 
 // JWT
@@ -47,22 +47,22 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 builder
     .Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
 
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
-        };
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+      };
     });
 
 // ----------------------------------------------
@@ -88,7 +88,14 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("DefaultConnection is not configured");
 
-builder.Services.AddDbContext<HomeLedgerDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<HomeLedgerDbContext>(options =>
+    options
+        .UseNpgsql(connectionString)
+        .UseLazyLoadingProxies()
+        .LogTo(Console.WriteLine, LogLevel.Debug)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors()
+);
 
 // ----------------------------------------------
 // SuperUser Policy
@@ -102,14 +109,14 @@ builder
 // ----------------------------------------------
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        "AllowFrontend",
-        policy =>
-            policy
-                .WithOrigins("http://192.168.0.19:3000", "http://localhost:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-    );
+  options.AddPolicy(
+      "AllowFrontend",
+      policy =>
+          policy
+              .WithOrigins("http://192.168.0.19:3000", "http://localhost:3000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+  );
 });
 
 var app = builder.Build();
@@ -117,12 +124,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeLedger API v1");
-        options.RoutePrefix = "swagger";
-    });
+  app.UseSwagger();
+  app.UseSwaggerUI(options =>
+  {
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeLedger API v1");
+    options.RoutePrefix = "swagger";
+  });
 }
 
 app.UseMiddleware<CustomNotAcceptableMiddleware>();

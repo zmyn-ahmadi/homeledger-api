@@ -45,6 +45,7 @@ public class UserController(IUserServices userServices) : ControllerBase
   [HttpGet("{id:int}")]
   public async Task<ActionResult<User>> GetUser([FromRoute] int id)
   {
+    // Fetching only the User entity by primary key
     var user = await _userServices.GetUserAsync(id);
     if (user == null)
       return NotFound(new { Message = $"User with ID {id} not found." });
@@ -52,7 +53,38 @@ public class UserController(IUserServices userServices) : ControllerBase
     if (!ModelState.IsValid)
       return BadRequest(ModelState);
 
-    return Ok(user);
+    // Load Profile and Incomes automatrically when accessed
+    var profile = user.Profile;
+    var incomes = user.Incomes;
+
+    var result = new
+    {
+      user.UserId,
+      user.FirstName,
+      user.Email,
+
+      Profile = profile == null
+            ? null
+            : new
+            {
+              profile.Address,
+              profile.Phone,
+              DateOfBirth = profile.DOB.ToString("yyyy-MM-dd"),
+            },
+
+      Incomes = incomes
+            ?.Select(i => new
+            {
+              i.Category.Name,
+              i.Amount,
+              Date = i.Date.ToString("yyyy-MM-dd"),
+              i.Description,
+            })
+            .ToList(),
+    };
+
+    // return structured anonymous object
+    return Ok(result);
   }
 
   [Authorize(Policy = "SuperUserOnly")]
