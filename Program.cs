@@ -1,7 +1,6 @@
 using System.Text;
 using HomeLedger.API.Middleware;
 using HomeLedger.API.Persistence;
-using HomeLedger.API.Persistence.Repositories.Interfaces;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -118,6 +117,11 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
   );
 });
+
+// ----------------------------------------------
+// AutoMapper
+// ----------------------------------------------
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 

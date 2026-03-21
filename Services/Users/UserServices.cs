@@ -1,61 +1,63 @@
-using HomeLedger.API.Dtos.User;
+using AutoMapper;
+using HomeLedger.API.DTOs.User;
 using HomeLedger.API.Models;
 using HomeLedger.API.Utils;
 
 namespace HomeLedger.API.Services.Users;
 
-public class UserServices(IUnitOfWork uow) : IUserServices
+public class UserServices(IUnitOfWork uow, IMapper mapper) : IUserServices
 {
+  private readonly IMapper _mapper = mapper;
+
   public IQueryable<User> GetUserQueryAble()
   {
-    return uow.Users.GetQueryable();
+    var users = uow.Users.GetQueryable();
+    return users;
   }
 
-  public Task<IEnumerable<User>> GetUsersAsync()
+  public async Task<IEnumerable<UserDTO>> GetUsersAsync()
   {
-    return uow.Users.GetAllAsync();
+    var users = await uow.Users.GetAllAsync();
+    var usersDTOs = _mapper.Map<List<UserDTO>>(users);
+    return usersDTOs;
   }
 
-  public async Task<User?> GetUserAsync(int id)
+  public async Task<UserDTO> GetUserAsync(int id)
   {
     // check if user exists
-    return await uow.Users.GetByIdAsync(id)
+    var user =
+        await uow.Users.GetByIdAsync(id)
         ?? throw new KeyNotFoundException($"User with id:{id} not found.");
+    return _mapper.Map<UserDTO>(user);
   }
 
-  public Task<User?> GetUserByEmailAsync(string email)
+  public async Task<User> GetUserByEmailAsync(string email)
   {
-    return uow.Users.GetByEmailAsync(email);
+    return await uow.Users.GetByEmailAsync(email);
   }
 
-  public async Task<User> CreateUserAsync(CreateRequestDto createUser)
+  public async Task<UserDTO> CreateUserAsync(CreateUserDTO request)
   {
     // check if user exists
-    var email = createUser.Email?.Trim().ToLower();
+    var email = request.Email.Trim().ToLower();
     var existingUser = await uow.Users.GetByEmailAsync(email);
 
     if (existingUser != null)
-      throw new InvalidOperationException($"User '{createUser.Email}' already exists.");
+      throw new Exception($"User '{request.Email}' already exists.");
 
-    var passwordHash =
-        PasswordManager.Hash(createUser.Password)
-        ?? throw new InvalidOperationException("Password is required.");
+    var newUser = _mapper.Map<User>(request);
 
-    var newUser = new User
-    {
-      UserName = createUser.UserName,
-      FirstName = createUser.FirstName,
-      LastName = createUser.LastName,
-      Password = passwordHash,
-      Email = email,
-      LastLogin = DateTime.UtcNow,
-      IsSuperUser = false,
-    };
+    var passwordHash = PasswordManager.Hash(newUser.Password);
+
+    newUser.Password = passwordHash;
+    newUser.Email = email;
+    newUser.IsActive = true;
+    newUser.IsSuperUser = false;
 
     await uow.Users.AddAsync(newUser);
     await uow.CommitAsync();
 
-    return newUser;
+    return _mapper.Map<UserDTO>(newUser);
   }
 
   public async Task<bool> DeleteUserAsync(int id)
@@ -66,20 +68,24 @@ public class UserServices(IUnitOfWork uow) : IUserServices
     return result;
   }
 
-  public async Task<bool> UpdateUserAsync(int id, UpdateRequestDto updateUser)
+  public async Task<bool> UpdateUserAsync(int id, UpdateUserDTO request)
   {
     // check if user exists
     var user =
         await uow.Users.GetByIdAsync(id)
         ?? throw new KeyNotFoundException($"User with id:{id} not found.");
 
-    if (!string.IsNullOrWhiteSpace(updateUser.Password))
-      user.Password = PasswordManager.Hash(updateUser.Password);
+    if (!string.IsNullOrWhiteSpace(request.Email))
+    {
+      var normalizedEmail = request.Email.Trim().ToLower();
+      var exists = await uow.Users.GetByEmailAsync(normalizedEmail);
+      if (exists != null && exists.UserId != id)
+        throw new InvalidOperationException("Email already in use.");
 
-    user.FirstName = updateUser.FirstName;
-    user.LastName = updateUser.LastName;
-    user.Email = updateUser.Email?.Trim().ToLower();
-    user.IsSuperUser = updateUser.IsSuperUser;
+      user.Email = normalizedEmail;
+    }
+
+    _mapper.Map<User>(request);
 
     await uow.Users.UpdateAsync(user);
     await uow.CommitAsync();

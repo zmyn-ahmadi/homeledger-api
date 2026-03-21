@@ -16,10 +16,10 @@ public class Category : BaseAuditableEntity
 
   [Required]
   [MaxLength(100, ErrorMessage = "Category name must be 100 characters or less.")]
-  public string? Name { get; set; }
+  public string Name { get; set; }
 
   [MaxLength(7)]
-  public string? Color { get; set; } = "#6366f1";
+  public string Color { get; set; } = "#6366f1";
 
   public string? Icon { get; set; }
   public TransactionType Type { get; set; }

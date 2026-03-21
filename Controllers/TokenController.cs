@@ -1,4 +1,4 @@
-using HomeLedger.API.Dtos;
+using HomeLedger.API.DTOs.User;
 using HomeLedger.API.Persistence;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -18,80 +18,80 @@ public class TokenController(
     HomeLedgerDbContext db
 ) : ControllerBase
 {
-    private readonly IUserServices _userServices = userService;
-    private readonly JwtService _jwtService = jwtService;
-    private readonly HomeLedgerDbContext _db = db;
+  private readonly IUserServices _userServices = userService;
+  private readonly JwtService _jwtService = jwtService;
+  private readonly HomeLedgerDbContext _db = db;
 
-    [HttpPost("login")]
-    public async Task<ActionResult> Login(LoginRequest request)
+  [HttpPost("login")]
+  public async Task<ActionResult> Login(UserLoginDTO request)
+  {
+    if (request.Email == null)
     {
-        if (request.Email == null)
+      return NotFound("Email is required");
+    }
+    var user = await _userServices.GetUserByEmailAsync(request.Email);
+    if (user == null || !PasswordManager.Verify(request.Password, user.Password))
+      return Unauthorized("Invalid credentials");
+
+    // update last login
+    user.LastLogin = DateTime.UtcNow;
+
+    // generate tokens
+    var (accessToken, refreshToken) = _jwtService.GenerateTokens(user);
+
+    // save that to db
+    await _db.RefreshTokens.AddAsync(refreshToken);
+    await _db.SaveChangesAsync();
+
+    // Return it in HttpOnly cookie
+    Response.Cookies.Append(
+        "refreshToken",
+        refreshToken.Token,
+        new CookieOptions
         {
-            return NotFound("Email is required");
+          HttpOnly = true,
+          Secure = true,
+          SameSite = SameSiteMode.Strict,
+          Expires = refreshToken.Expiry,
         }
-        var user = await _userServices.GetUserByEmailAsync(request.Email);
-        if (user == null || !PasswordManager.Verify(request.Password, user.Password))
-            return Unauthorized("Invalid credentials");
+    );
 
-        // update last login
-        user.LastLogin = DateTime.UtcNow;
+    return Ok(new { accessToken });
+  }
 
-        // generate tokens
-        var (accessToken, refreshToken) = _jwtService.GenerateTokens(user);
+  [HttpPost("refresh")]
+  public async Task<ActionResult> RefreshToken()
+  {
+    var incomingToken = Request.Cookies["refreshToken"];
+    if (incomingToken == null)
+      return Unauthorized("No refresh token found.");
 
-        // save that to db
-        await _db.RefreshTokens.AddAsync(refreshToken);
-        await _db.SaveChangesAsync();
+    // Find the refresh token in db
+    var storedToken = await _db
+        .RefreshTokens.Include(x => x.User)
+        .FirstOrDefaultAsync(x => x.Token == incomingToken);
 
-        // Return it in HttpOnly cookie
-        Response.Cookies.Append(
-            "refreshToken",
-            refreshToken.Token,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = refreshToken.Expiry,
-            }
-        );
+    if (storedToken == null || storedToken.IsRevoked || storedToken.Expiry < DateTime.UtcNow)
+      return Unauthorized("Invalid or expired refresh token");
 
-        return Ok(new { accessToken });
-    }
+    // Rotate: revoke old, issue new
+    storedToken.IsRevoked = true;
+    var (newAccessToken, newRefreshToken) = _jwtService.GenerateTokens(storedToken.User);
+    await _db.RefreshTokens.AddAsync(newRefreshToken);
+    await _db.SaveChangesAsync();
 
-    [HttpPost("refresh")]
-    public async Task<ActionResult> RefreshToken()
-    {
-        var incomingToken = Request.Cookies["refreshToken"];
-        if (incomingToken == null)
-            return Unauthorized("No refresh token found.");
+    Response.Cookies.Append(
+        "refreshToken",
+        newRefreshToken.Token,
+        new CookieOptions
+        {
+          HttpOnly = true,
+          Secure = true,
+          SameSite = SameSiteMode.Strict,
+          Expires = newRefreshToken.Expiry,
+        }
+    );
 
-        // Find the refresh token in db
-        var storedToken = await _db
-            .RefreshTokens.Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.Token == incomingToken);
-
-        if (storedToken == null || storedToken.IsRevoked || storedToken.Expiry < DateTime.UtcNow)
-            return Unauthorized("Invalid or expired refresh token");
-
-        // Rotate: revoke old, issue new
-        storedToken.IsRevoked = true;
-        var (newAccessToken, newRefreshToken) = _jwtService.GenerateTokens(storedToken.User);
-        await _db.RefreshTokens.AddAsync(newRefreshToken);
-        await _db.SaveChangesAsync();
-
-        Response.Cookies.Append(
-            "refreshToken",
-            newRefreshToken.Token,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = newRefreshToken.Expiry,
-            }
-        );
-
-        return Ok(new { accessToken = newAccessToken });
-    }
+    return Ok(new { accessToken = newAccessToken });
+  }
 }
