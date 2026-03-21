@@ -1,14 +1,21 @@
-# Build outputs
-obj/
-bin/
-*.user
-*.cache
-
-# Visual Studio
-.vs/
-*.suo
-*.userprefs
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
 
 # NuGet
-packages/
 *.nupkg
+*.snupkg
+packages/
+!packages/repositories.config
+
+# VS Cache
+.vs/
+*.cache
