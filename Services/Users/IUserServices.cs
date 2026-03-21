@@ -12,4 +12,5 @@ public interface IUserServices
   Task<User> CreateUserAsync(CreateRequestDto request);
   Task<bool> UpdateUserAsync(int id, UpdateRequestDto request);
   Task<bool> DeleteUserAsync(int id);
+  void ToggleLazyLoading(bool status);
 }
