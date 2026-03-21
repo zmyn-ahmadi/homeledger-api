@@ -30,9 +30,9 @@ public class UnitOfWork : IUnitOfWork
     return (IRepository<T>)repo;
   }
 
-  public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
+  public Task<int> CommitAsync() => _context.SaveChangesAsync();
 
-  public async Task RollbackAsync() => await _context.Database.RollbackTransactionAsync();
+  public Task RollbackAsync() => _context.Database.RollbackTransactionAsync();
 
   public void Dispose() => _context.Dispose();
 }

@@ -67,7 +67,7 @@ public class UserController(IUserServices userServices) : ControllerBase
 
     var createdUser = await _userServices.CreateUserAsync(createUser);
 
-    return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+    return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
   }
 
   [Authorize(Policy = "SuperUserOnly")]
@@ -114,6 +114,6 @@ public class UserController(IUserServices userServices) : ControllerBase
 
     var createdUser = await _userServices.CreateUserAsync(createUser);
 
-    return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+    return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
   }
 }
