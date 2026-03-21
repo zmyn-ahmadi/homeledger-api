@@ -1,7 +1,7 @@
 using System.Text;
+using HomeLedger.API.MappingProfiles;
 using HomeLedger.API.Middleware;
 using HomeLedger.API.Persistence;
-using HomeLedger.API.Persistence.Repositories.Interfaces;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -88,7 +88,14 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("DefaultConnection is not configured");
 
-builder.Services.AddDbContext<HomeLedgerDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<HomeLedgerDbContext>(options =>
+    options
+        .UseNpgsql(connectionString)
+        .UseLazyLoadingProxies()
+        .LogTo(Console.WriteLine, LogLevel.Debug)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors()
+);
 
 // ----------------------------------------------
 // SuperUser Policy
@@ -111,6 +118,14 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader()
     );
 });
+
+// ----------------------------------------------
+// AutoMapper
+// ----------------------------------------------
+builder.Services.AddAutoMapper(
+    cfg => cfg.LicenseKey = builder.Configuration["AutoMapperKey:LicenseKey"],
+    typeof(Program)
+);
 
 var app = builder.Build();
 
