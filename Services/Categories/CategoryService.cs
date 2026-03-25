@@ -1,43 +1,64 @@
-using HomeLedger.API.Models;
+using HomeLedger.API.DTOs.Category;
+using HomeLedger.API.MappingProfiles;
 
 namespace HomeLedger.API.Services.Categories;
 
-public class CategoryService(IUnitOfWork uow) : ICategoryService
+public class CategoryService(IUnitOfWork uow, CategoryMapper mapper) : ICategoryService
 {
-  public Task<IEnumerable<Category>> GetAllAsync()
+  private readonly CategoryMapper _mapper = mapper;
+
+  public async Task<IEnumerable<CategoryDTO>> GetAllAsync()
   {
-    return uow.Categories.GetAllAsync();
+    var categories = await uow.Categories.GetAllAsync();
+    return categories.Select(_mapper.ToDto);
   }
 
-  public Task<Category?> GetByIdAsync(int id)
+  public async Task<CategoryDTO> GetByIdAsync(int id)
   {
-    return uow.Categories.GetByIdAsync(id);
+    var category = await uow.Categories.GetByIdAsync(id);
+    return _mapper.ToDto(category);
   }
 
-  public async Task<Category> AddAsync(Category category)
+  public async Task<CategoryDTO> AddAsync(CreateCategoryDTO request)
   {
-    if (await uow.Categories.NameExistsAsync(category.Name))
-      throw new InvalidOperationException($"Category '{category.Name}' already exists.");
+    var normalizedName = request.Name.Trim().ToLower();
+    if (await uow.Categories.NameExistsAsync(normalizedName, request.OwnerId))
+      throw new InvalidOperationException($"Category '{request.Name}' already exists.");
 
-    await uow.Categories.AddAsync(category);
+    var newCat = _mapper.ToEntity(request);
+    newCat.CreatedAt = DateTime.UtcNow;
+    newCat.IsActive = true;
+
+    await uow.Categories.AddAsync(newCat);
     await uow.CommitAsync();
-    return category;
+
+    return _mapper.ToDto(newCat);
   }
 
-  public async Task<Category> UpdateAsync(int id, Category category)
+  public async Task<CategoryDTO> UpdateAsync(int id, UpdateCategoryDTO request)
   {
     var existing =
         await uow.Categories.GetByIdAsync(id)
         ?? throw new KeyNotFoundException($"Category with ID {id} not found.");
 
-    existing.Name = category.Name;
-    existing.Type = category.Type;
-    existing.Icon = category.Icon;
-    existing.Color = category.Color;
+    if (!string.IsNullOrWhiteSpace(request.Name))
+    {
+      var normalizedName = request.Name.Trim().ToLower();
+      var categoryExists = await uow.Categories.NameExistsAsync(
+          normalizedName,
+          existing.OwnerId
+      );
+      if (categoryExists)
+        throw new InvalidOperationException($"Category '{request.Name}' already exists.");
+    }
+
+    _mapper.UpdateEntity(request, existing);
+    existing.UpdatedAt = DateTime.UtcNow;
 
     await uow.Categories.UpdateAsync(existing);
     await uow.CommitAsync();
-    return existing;
+
+    return _mapper.ToDto(existing);
   }
 
   public async Task<bool> DeleteAsync(int id)

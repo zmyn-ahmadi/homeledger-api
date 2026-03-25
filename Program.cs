@@ -18,28 +18,46 @@ builder.Services.AddAuthorization();
 builder
     .Services.AddControllers(options =>
     {
-        options.ReturnHttpNotAcceptable = true;
+      options.ReturnHttpNotAcceptable = true;
     })
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+      options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc(
-        "v1",
-        new OpenApiInfo
-        {
-            Title = "HomeLedger API",
-            Version = "v1",
-            Description =
-                "HomeLedger API provides a complete backend for personal finance management.",
-            Contact = new OpenApiContact { Email = "zmnahm17@gmail.com", Name = "zmyn ahmadi" },
-        }
-    );
+  options.SwaggerDoc(
+      "v1",
+      new OpenApiInfo
+      {
+        Title = "HomeLedger API",
+        Version = "v1",
+        Description =
+              "HomeLedger API provides a complete backend for personal finance management.",
+        Contact = new OpenApiContact { Email = "zmnahm17@gmail.com", Name = "zmyn ahmadi" },
+      }
+  );
+
+  options.AddSecurityDefinition(
+      "Bearer",
+      new OpenApiSecurityScheme
+      {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token.",
+      }
+  );
+
+  options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+  {
+    [new OpenApiSecuritySchemeReference("Bearer", document)] = [],
+  });
 });
 
 // JWT
@@ -47,22 +65,22 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 builder
     .Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
 
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
-        };
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+      };
     });
 
 // ----------------------------------------------
@@ -109,41 +127,48 @@ builder
 // ----------------------------------------------
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(
-        "AllowFrontend",
-        policy =>
-            policy
-                .WithOrigins("http://192.168.0.19:3000", "http://localhost:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-    );
+  options.AddPolicy(
+      "AllowFrontend",
+      policy =>
+          policy
+              .WithOrigins("http://192.168.0.19:3000", "http://localhost:3000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+  );
 });
 
+//
 // ----------------------------------------------
 // AutoMapper
 // ----------------------------------------------
-builder.Services.AddAutoMapper(
-    cfg => cfg.LicenseKey = builder.Configuration["AutoMapperKey:LicenseKey"],
-    typeof(Program)
-);
+// builder.Services.AddAutoMapper(
+//     cfg => cfg.LicenseKey = builder.Configuration["AutoMapperKey:LicenseKey"],
+//     typeof(Program)
+// );
+//
+
+// ----------------------------------------------
+// Mapperly mappers
+// ----------------------------------------------
+builder.Services.AddSingleton<CategoryMapper>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeLedger API v1");
-        options.RoutePrefix = "swagger";
-    });
+  app.UseSwagger();
+  app.UseSwaggerUI(options =>
+  {
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeLedger API v1");
+    options.RoutePrefix = "swagger";
+  });
 }
 
 app.UseMiddleware<CustomNotAcceptableMiddleware>();
 
-app.UseRouting();
 app.UseCors("AllowFrontend");
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

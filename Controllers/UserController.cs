@@ -1,5 +1,4 @@
-using HomeLedger.API.Dtos.User;
-using HomeLedger.API.Models;
+using HomeLedger.API.DTOs.User;
 using HomeLedger.API.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,19 +13,19 @@ public class UserController(IUserServices userServices) : ControllerBase
 {
   private readonly IUserServices _userServices = userServices;
 
-  [Authorize]
-  [HttpGet("search")]
-  public ActionResult<IEnumerable<User>> SearchUser([FromQuery] string name)
-  {
-    var query = _userServices.GetUserQueryAble();
-    if (!string.IsNullOrEmpty(name))
-    {
-      // this is 'Where' is composed onto the intial query
-      query = query.Where(u => u.FirstName.Contains(name));
-    }
-
-    return Ok(query.ToList());
-  }
+  // [Authorize]
+  // [HttpGet("search")]
+  // public ActionResult<IEnumerable<User>> SearchUser([FromQuery] string name)
+  // {
+  //   var query = _userServices.GetUserQueryAble();
+  //   if (!string.IsNullOrEmpty(name))
+  //   {
+  //     // this is 'Where' is composed onto the intial query
+  //     query = query.Where(u => u.FirstName.Contains(name));
+  //   }
+  //
+  //   return Ok(query.ToList());
+  // }
 
   /// <summary>
   /// Retrieves list of Users
@@ -35,7 +34,7 @@ public class UserController(IUserServices userServices) : ControllerBase
   // [Authorize(Policy = "SuperUserOnly")]
   [Authorize(Policy = "SuperUserOnly")]
   [HttpGet()]
-  public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+  public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
   {
     var users = await _userServices.GetUsersAsync();
     return Ok(users);
@@ -43,8 +42,9 @@ public class UserController(IUserServices userServices) : ControllerBase
 
   [Authorize(Policy = "SuperUserOnly")]
   [HttpGet("{id:int}")]
-  public async Task<ActionResult<User>> GetUser([FromRoute] int id)
+  public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int id)
   {
+    // Fetching only the User entity by primary key
     var user = await _userServices.GetUserAsync(id);
     if (user == null)
       return NotFound(new { Message = $"User with ID {id} not found." });
@@ -52,12 +52,44 @@ public class UserController(IUserServices userServices) : ControllerBase
     if (!ModelState.IsValid)
       return BadRequest(ModelState);
 
-    return Ok(user);
+    var profile = user.Profile;
+    var categories = user.Categories;
+
+    var result = new
+    {
+      user.UserId,
+      user.UserName,
+      user.Email,
+      user.FullName,
+
+      Profile = profile == null
+            ? null
+            : new
+            {
+              profile.Address,
+              profile.Phone,
+              profile.DOB,
+            },
+
+      Categories = categories
+            ?.Select(c => new
+            {
+              c.CategoryId,
+              c.Name,
+              c.Color,
+              c.Type,
+              c.Icon,
+            })
+            .ToList(),
+    };
+
+    // return structured anonymous object
+    return Ok(result);
   }
 
   [Authorize(Policy = "SuperUserOnly")]
   [HttpPost]
-  public async Task<ActionResult<User>> PostUser([FromBody] CreateRequestDto createUser)
+  public async Task<ActionResult<UserDTO>> PostUser([FromBody] CreateUserDTO createUser)
   {
     if (createUser == null)
       return BadRequest("Request body is missing or invalid.");
@@ -74,7 +106,7 @@ public class UserController(IUserServices userServices) : ControllerBase
   [HttpPut("{id:int}")]
   public async Task<IActionResult> PutUser(
       [FromRoute] int id,
-      [FromBody] UpdateRequestDto updateUser
+      [FromBody] UpdateUserDTO updateUser
   )
   {
     if (!ModelState.IsValid)
@@ -102,9 +134,7 @@ public class UserController(IUserServices userServices) : ControllerBase
   }
 
   [HttpPost("register")]
-  public async Task<ActionResult<UserResponseDto>> RegisterUser(
-      [FromBody] CreateRequestDto createUser
-  )
+  public async Task<ActionResult<UserDTO>> RegisterUser([FromBody] CreateUserDTO createUser)
   {
     if (createUser == null)
       return BadRequest("Request body is missing or invalid.");
