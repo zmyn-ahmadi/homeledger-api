@@ -19,7 +19,7 @@ using HomeLedger.API.DTOs.Category;
 using HomeLedger.API.Models;
 using Riok.Mapperly.Abstractions;
 
-namespace HomeLedger.API.MappingProfiles;
+namespace HomeLedger.API.Mappers;
 
 [Mapper]
 public partial class CategoryMapper

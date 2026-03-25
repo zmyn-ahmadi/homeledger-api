@@ -1,5 +1,5 @@
 using HomeLedger.API.DTOs.Category;
-using HomeLedger.API.MappingProfiles;
+using HomeLedger.API.Mappers;
 
 namespace HomeLedger.API.Services.Categories;
 
