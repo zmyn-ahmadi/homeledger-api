@@ -1,4 +1,4 @@
-using HomeLedger.API.DTOs.User;
+using HomeLedger.API.DTOs.UserDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Models;
 using HomeLedger.API.Utils;

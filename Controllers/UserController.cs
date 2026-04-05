@@ -1,4 +1,4 @@
-using HomeLedger.API.DTOs.User;
+using HomeLedger.API.DTOs.UserDTO;
 using HomeLedger.API.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,139 +11,127 @@ namespace HomeLedger.API.Controllers;
 [Consumes("application/json")]
 public class UserController(IUserServices userServices) : ControllerBase
 {
-  private readonly IUserServices _userServices = userServices;
+    private readonly IUserServices _userServices = userServices;
 
-  // [Authorize]
-  // [HttpGet("search")]
-  // public ActionResult<IEnumerable<User>> SearchUser([FromQuery] string name)
-  // {
-  //   var query = _userServices.GetUserQueryAble();
-  //   if (!string.IsNullOrEmpty(name))
-  //   {
-  //     // this is 'Where' is composed onto the intial query
-  //     query = query.Where(u => u.FirstName.Contains(name));
-  //   }
-  //
-  //   return Ok(query.ToList());
-  // }
+    // [Authorize]
+    // [HttpGet("search")]
+    // public ActionResult<IEnumerable<User>> SearchUser([FromQuery] string name)
+    // {
+    //   var query = _userServices.GetUserQueryAble();
+    //   if (!string.IsNullOrEmpty(name))
+    //   {
+    //     // this is 'Where' is composed onto the intial query
+    //     query = query.Where(u => u.FirstName.Contains(name));
+    //   }
+    //
+    //   return Ok(query.ToList());
+    // }
 
-  /// <summary>
-  /// Retrieves list of Users
-  /// </summary>
-  /// <return>Users</return>
-  // [Authorize(Policy = "SuperUserOnly")]
-  [Authorize(Policy = "SuperUserOnly")]
-  [HttpGet()]
-  public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
-  {
-    var users = await _userServices.GetUsersAsync();
-    return Ok(users);
-  }
-
-  [Authorize(Policy = "SuperUserOnly")]
-  [HttpGet("{id:int}")]
-  public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int id)
-  {
-    // Fetching only the User entity by primary key
-    var user = await _userServices.GetUserAsync(id);
-    if (user == null)
-      return NotFound(new { Message = $"User with ID {id} not found." });
-
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
-
-    var profile = user.Profile;
-    var categories = user.Categories;
-
-    var result = new
+    /// <summary>
+    /// Retrieves list of Users
+    /// </summary>
+    /// <return>Users</return>
+    // [Authorize(Policy = "SuperUserOnly")]
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet()]
+    public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
     {
-      user.UserId,
-      user.UserName,
-      user.Email,
-      user.FullName,
+        var users = await _userServices.GetUsersAsync();
+        return Ok(users);
+    }
 
-      Profile = profile == null
-            ? null
-            : new
-            {
-              profile.Address,
-              profile.Phone,
-              profile.DOB,
-            },
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int id)
+    {
+        // Fetching only the User entity by primary key
+        var user = await _userServices.GetUserAsync(id);
+        if (user == null)
+            return NotFound(new { Message = $"User with ID {id} not found." });
 
-      Categories = categories
-            ?.Select(c => new
-            {
-              c.CategoryId,
-              c.Name,
-              c.Color,
-              c.Type,
-              c.Icon,
-            })
-            .ToList(),
-    };
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    // return structured anonymous object
-    return Ok(result);
-  }
+        var profile = user.Profile;
 
-  [Authorize(Policy = "SuperUserOnly")]
-  [HttpPost]
-  public async Task<ActionResult<UserDTO>> PostUser([FromBody] CreateUserDTO createUser)
-  {
-    if (createUser == null)
-      return BadRequest("Request body is missing or invalid.");
+        var result = new
+        {
+            user.UserId,
+            user.UserName,
+            user.Email,
+            user.FullName,
 
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
+            Profile = profile == null
+                ? null
+                : new
+                {
+                    profile.Address,
+                    profile.Phone,
+                    profile.DOB,
+                },
+        };
 
-    var createdUser = await _userServices.CreateUserAsync(createUser);
+        // return structured anonymous object
+        return Ok(result);
+    }
 
-    return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
-  }
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpPost]
+    public async Task<ActionResult<UserDTO>> PostUser([FromBody] CreateUserDTO createUser)
+    {
+        if (createUser == null)
+            return BadRequest("Request body is missing or invalid.");
 
-  [Authorize(Policy = "SuperUserOnly")]
-  [HttpPut("{id:int}")]
-  public async Task<IActionResult> PutUser(
-      [FromRoute] int id,
-      [FromBody] UpdateUserDTO updateUser
-  )
-  {
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    var updated = await _userServices.UpdateUserAsync(id, updateUser);
-    if (!updated)
-      return NotFound(new { Message = $"User with ID: {id} not found." });
+        var createdUser = await _userServices.CreateUserAsync(createUser);
 
-    return NoContent();
-  }
+        return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
+    }
 
-  [Authorize(Policy = "SuperUserOnly")]
-  [HttpDelete("{id:int}")]
-  public async Task<IActionResult> DeleteUser([FromRoute] int id)
-  {
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> PutUser(
+        [FromRoute] int id,
+        [FromBody] UpdateUserDTO updateUser
+    )
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    var deleted = await _userServices.DeleteUserAsync(id);
-    if (!deleted)
-      return NotFound(new { Message = $"User with ID: {id} not found." });
+        var updated = await _userServices.UpdateUserAsync(id, updateUser);
+        if (!updated)
+            return NotFound(new { Message = $"User with ID: {id} not found." });
 
-    return NoContent();
-  }
+        return NoContent();
+    }
 
-  [HttpPost("register")]
-  public async Task<ActionResult<UserDTO>> RegisterUser([FromBody] CreateUserDTO createUser)
-  {
-    if (createUser == null)
-      return BadRequest("Request body is missing or invalid.");
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteUser([FromRoute] int id)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
+        var deleted = await _userServices.DeleteUserAsync(id);
+        if (!deleted)
+            return NotFound(new { Message = $"User with ID: {id} not found." });
 
-    var createdUser = await _userServices.CreateUserAsync(createUser);
+        return NoContent();
+    }
 
-    return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
-  }
+    [HttpPost("register")]
+    public async Task<ActionResult<UserDTO>> RegisterUser([FromBody] CreateUserDTO createUser)
+    {
+        if (createUser == null)
+            return BadRequest("Request body is missing or invalid.");
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var createdUser = await _userServices.CreateUserAsync(createUser);
+
+        return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
+    }
 }

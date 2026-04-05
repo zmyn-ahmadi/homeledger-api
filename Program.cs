@@ -2,6 +2,7 @@ using System.Text;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Middleware;
 using HomeLedger.API.Persistence;
+using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -89,12 +90,6 @@ builder
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // ----------------------------------------------
-// User Service
-// ----------------------------------------------
-builder.Services.AddScoped<IUserServices, UserServices>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// ----------------------------------------------
 // Jwt Service
 // ----------------------------------------------
 builder.Services.AddScoped<JwtService>();
@@ -111,8 +106,6 @@ builder.Services.AddDbContext<HomeLedgerDbContext>(options =>
         .UseNpgsql(connectionString)
         .UseLazyLoadingProxies()
         .LogTo(Console.WriteLine, LogLevel.Debug)
-        .EnableSensitiveDataLogging()
-        .EnableDetailedErrors()
 );
 
 // ----------------------------------------------
@@ -152,6 +145,22 @@ builder.Services.AddCors(options =>
 // ----------------------------------------------
 builder.Services.AddSingleton<CategoryMapper>();
 builder.Services.AddSingleton<UserMapper>();
+builder.Services.AddSingleton<BillPaymentMapper>();
+
+// ----------------------------------------------
+// User Service
+// ----------------------------------------------
+builder.Services.AddScoped<IUserServices, UserServices>();
+
+// ----------------------------------------------
+// Category Service
+// ----------------------------------------------
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+// ----------------------------------------------
+// BillPayment Service
+// ----------------------------------------------
+builder.Services.AddScoped<IBillPaymentService, BillPaymentService>();
 
 var app = builder.Build();
 

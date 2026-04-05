@@ -1,4 +1,4 @@
-using HomeLedger.API.Dtos;
+using HomeLedger.API.DTOs.UserDTO;
 using HomeLedger.API.Persistence;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -23,7 +23,7 @@ public class TokenController(
     private readonly HomeLedgerDbContext _db = db;
 
     [HttpPost("login")]
-    public async Task<ActionResult> Login(LoginRequest request)
+    public async Task<ActionResult> Login(UserLoginDTO request)
     {
         if (request.Email == null)
         {

@@ -1,4 +1,4 @@
-using HomeLedger.API.Models;
+using HomeLedger.API.DTOs.CategoryDTO;
 using HomeLedger.API.Services.Categories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +13,9 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
 {
     private readonly ICategoryService _service = cateogryService;
 
-    // [Authorize]
+    [Authorize]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
     {
         var categories = await _service.GetAllAsync();
         if (!categories.Any())
@@ -24,9 +24,9 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         return Ok(categories);
     }
 
-    // [Authorize]
+    [Authorize]
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Category?>> GetCategory(int id)
+    public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
     {
         var category = await _service.GetByIdAsync(id);
         if (category == null)
@@ -38,9 +38,11 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         return Ok(category);
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Category>> PostCategory([FromBody] Category createCategory)
+    public async Task<ActionResult<CategoryDTO>> PostCategory(
+        [FromBody] CreateCategoryDTO createCategory
+    )
     {
         if (createCategory == null)
             return BadRequest("Request body is missing or invalid");
@@ -57,11 +59,11 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         );
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpPut("id:int")]
-    public async Task<ActionResult<Category>> PutCategory(
+    public async Task<ActionResult<CategoryDTO>> PutCategory(
         [FromRoute] int id,
-        [FromBody] Category updateCategory
+        [FromBody] UpdateCategoryDTO updateCategory
     )
     {
         if (updateCategory == null)
@@ -74,7 +76,7 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         return Ok(updatedCategory);
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<bool>> DeleteCategory([FromRoute] int id)
     {

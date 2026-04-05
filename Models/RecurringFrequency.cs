@@ -2,8 +2,8 @@ namespace HomeLedger.API.Models;
 
 public enum RecurringFrequency
 {
-  Weekly,
-  BiWeekly,
-  Monthly,
-  Yearly,
+    Weekly,
+    BiWeekly,
+    Monthly,
+    Yearly,
 }
