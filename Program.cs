@@ -2,6 +2,7 @@ using System.Text;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Middleware;
 using HomeLedger.API.Persistence;
+using HomeLedger.API.Services.Basiq;
 using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Token;
@@ -151,6 +152,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+
+builder.Services.AddHttpClient<BasiqServices>();
 
 var app = builder.Build();
 

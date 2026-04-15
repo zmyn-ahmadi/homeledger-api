@@ -51,7 +51,7 @@ public class TokenController(
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Expires = refreshToken.Expiry,
             }
         );
@@ -87,7 +87,7 @@ public class TokenController(
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Expires = newRefreshToken.Expiry,
             }
         );

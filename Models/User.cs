@@ -16,6 +16,8 @@ public class User : BaseAuditableEntity
 
     public string? FullName { get; set; }
 
+    public string? BasiqUserId { get; set; }
+
     public DateTime LastLogin { get; set; }
     public bool IsSuperUser { get; set; }
 
