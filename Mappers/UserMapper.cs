@@ -8,16 +8,7 @@ namespace HomeLedger.API.Mappers;
 public partial class UserMapper
 {
     // User -> UserDTO
-    // Tell Mapperly to ignore FullName — we'll set it manually
-    [MapperIgnoreTarget(nameof(UserDTO.FullName))]
-    private partial UserDTO ToDtoInternal(User user);
-
-    public UserDTO ToDto(User user)
-    {
-        var dto = ToDtoInternal(user);
-        dto.FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim();
-        return dto;
-    }
+    public partial UserDTO ToDto(User user);
 
     // CreateDTO -> User
     public partial User ToEntity(CreateUserDTO dto);

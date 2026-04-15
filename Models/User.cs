@@ -2,24 +2,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HomeLedger.API.Models;
 
-public class User
+public class User : BaseAuditableEntity
 {
     [Key]
     public int UserId { get; set; }
 
     [Required]
-    [MaxLength(150, ErrorMessage = "Username must be 150 characters or less.")]
-    public string UserName { get; set; } = string.Empty;
-
-    [Required]
     [EmailAddress]
-    public string? Email { get; set; }
+    public string Email { get; set; }
 
     [Required]
-    public string? Password { get; set; }
+    public string Password { get; set; }
 
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
+    public string? FullName { get; set; }
 
     public DateTime LastLogin { get; set; }
     public bool IsSuperUser { get; set; }

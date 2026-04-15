@@ -57,7 +57,6 @@ public class UserController(IUserServices userServices) : ControllerBase
         var result = new
         {
             user.UserId,
-            user.UserName,
             user.Email,
             user.FullName,
 

@@ -130,37 +130,27 @@ builder.Services.AddCors(options =>
     );
 });
 
-//
-// ----------------------------------------------
-// AutoMapper
-// ----------------------------------------------
-// builder.Services.AddAutoMapper(
-//     cfg => cfg.LicenseKey = builder.Configuration["AutoMapperKey:LicenseKey"],
-//     typeof(Program)
-// );
-//
-
 // ----------------------------------------------
 // Mapperly mappers
 // ----------------------------------------------
-builder.Services.AddSingleton<CategoryMapper>();
-builder.Services.AddSingleton<UserMapper>();
+builder.Services.AddSingleton<BillMapper>();
 builder.Services.AddSingleton<BillPaymentMapper>();
+builder.Services.AddSingleton<BudgetMapper>();
+builder.Services.AddSingleton<CategoryMapper>();
+builder.Services.AddSingleton<ExpenseMapper>();
+builder.Services.AddSingleton<IncomeMapper>();
+builder.Services.AddSingleton<UserMapper>();
 
 // ----------------------------------------------
-// User Service
+// Services
 // ----------------------------------------------
-builder.Services.AddScoped<IUserServices, UserServices>();
-
-// ----------------------------------------------
-// Category Service
-// ----------------------------------------------
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// ----------------------------------------------
-// BillPayment Service
-// ----------------------------------------------
+builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IBillPaymentService, BillPaymentService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<IUserServices, UserServices>();
 
 var app = builder.Build();
 
