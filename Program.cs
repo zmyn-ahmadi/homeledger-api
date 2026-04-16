@@ -106,7 +106,7 @@ builder.Services.AddDbContext<HomeLedgerDbContext>(options =>
     options
         .UseNpgsql(connectionString)
         .UseLazyLoadingProxies()
-        .LogTo(Console.WriteLine, LogLevel.Debug)
+        .LogTo(Console.WriteLine, LogLevel.Error)
 );
 
 // ----------------------------------------------
