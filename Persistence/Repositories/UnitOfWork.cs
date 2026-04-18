@@ -17,6 +17,8 @@ public class UnitOfWork : IUnitOfWork
         Budgets = new BudgetRepository(_context);
         Expenses = new ExpenseRepository(_context);
         Incomes = new IncomeRepository(_context);
+        Transactions = new TransactionRepository(_context);
+        Accounts = new AccountRepository(_context);
     }
 
     public CategoryRepository Categories { get; }
@@ -26,6 +28,8 @@ public class UnitOfWork : IUnitOfWork
     public BudgetRepository Budgets { get; }
     public ExpenseRepository Expenses { get; }
     public IncomeRepository Incomes { get; }
+    public TransactionRepository Transactions { get; set; }
+    public AccountRepository Accounts { get; set; }
 
     // Resolves a generic repo on-demand for any entity not needing a dedicated repo
     public IRepository<T> Repository<T>()

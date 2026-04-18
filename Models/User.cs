@@ -25,6 +25,7 @@ public class User : BaseAuditableEntity
 
     // 1:1 -> a user may have one profile
     public virtual UserProfile? Profile { get; set; }
+    public virtual WorkDays? WorkDays { get; set; }
 
     // 1:M User can create multiple categories
     public virtual ICollection<Category> Categories { get; set; } = [];

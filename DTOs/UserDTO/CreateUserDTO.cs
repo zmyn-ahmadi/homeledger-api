@@ -12,7 +12,6 @@ public class CreateUserDTO
     [Required]
     [MinLength(6)]
     public string Password { get; set; } = string.Empty;
-
     public string? FullName { get; set; }
 
     public UserProfileDTO? Profile { get; set; }
