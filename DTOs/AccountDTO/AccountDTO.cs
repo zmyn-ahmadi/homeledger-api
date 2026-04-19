@@ -1,4 +1,6 @@
-namespace HomeLedger.API.Models;
+using HomeLedger.API.Models;
+
+namespace HomeLedger.API.DTOs.AccountDTO;
 
 public class AccountDTO : BaseAuditableEntity
 {

@@ -1,5 +1,7 @@
 using HomeLedger.API.DTOs.IncomeDTO;
 
+namespace HomeLedger.API.Services.Incomes;
+
 public interface IIncomeService
 {
     Task<IEnumerable<IncomeDTO>> GetAllAsync();
