@@ -1,3 +1,5 @@
+using HomeLedger.API.Models;
+
 public class Transaction
 {
     public int TransactionId { get; set; }
@@ -6,7 +8,7 @@ public class Transaction
     public DateTime Date { get; set; }
 
     public int AccountId { get; set; }
-    public Account Account { get; set; }
+    public Account? Account { get; set; }
 
-    public virtual Category Category { get; set; }
+    public virtual Category? Category { get; set; }
 }

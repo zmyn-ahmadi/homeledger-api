@@ -5,6 +5,7 @@ using HomeLedger.API.Persistence;
 using HomeLedger.API.Services.Basiq;
 using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
+using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

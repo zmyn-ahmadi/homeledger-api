@@ -48,11 +48,6 @@ _ReSharper*/
 .dotnet/
 artifacts/
 
-# Node (if frontend assets are inside this repo)
-node_modules/
-dist/
-build/
-
 # Environment / secrets
 .env
 .env.*
@@ -62,3 +57,7 @@ secrets.json
 
 # Azure / deployment local settings
 local.settings.json
+
+# migrations files
+./Migrations/*
+./MigrationScript.sql

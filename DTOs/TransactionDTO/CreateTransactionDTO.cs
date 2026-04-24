@@ -1,3 +1,5 @@
+using HomeLedger.API.Models;
+
 namespace HomeLedger.API.DTOs.TransactionDTO;
 
 public class CreateTransactionDTO

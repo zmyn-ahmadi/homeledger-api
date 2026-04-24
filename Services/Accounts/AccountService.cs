@@ -1,3 +1,5 @@
+using HomeLedger.API.DTOs.AccountDTO;
+
 namespace HomeLedger.API.Services.Accounts;
 
 public class AccountService(IUnitOfWork _uow) : IAccountService

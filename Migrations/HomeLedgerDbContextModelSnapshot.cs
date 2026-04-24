@@ -494,11 +494,16 @@ namespace HomeLedger.API.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("WorkDaysId")
+                        .HasColumnType("integer");
+
                     b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_Email");
+
+                    b.HasIndex("WorkDaysId");
 
                     b.ToTable("Users");
                 });
@@ -548,6 +553,29 @@ namespace HomeLedger.API.Migrations
                         .HasDatabaseName("IX_UserProfiles_UserId");
 
                     b.ToTable("UserProfiles");
+                });
+
+            modelBuilder.Entity("HomeLedger.API.Models.WorkDays", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.PrimitiveCollection<bool[]>("DaysWorked")
+                        .IsRequired()
+                        .HasColumnType("boolean[]");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkDays");
                 });
 
             modelBuilder.Entity("BillShares", b =>
@@ -684,6 +712,15 @@ namespace HomeLedger.API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HomeLedger.API.Models.User", b =>
+                {
+                    b.HasOne("HomeLedger.API.Models.WorkDays", "WorkDays")
+                        .WithMany()
+                        .HasForeignKey("WorkDaysId");
+
+                    b.Navigation("WorkDays");
                 });
 
             modelBuilder.Entity("HomeLedger.API.Models.UserProfile", b =>

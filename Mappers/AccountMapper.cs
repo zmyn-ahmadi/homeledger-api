@@ -1,3 +1,4 @@
+using HomeLedger.API.DTOs.AccountDTO;
 using HomeLedger.API.Models;
 using Riok.Mapperly.Abstractions;
 
@@ -10,5 +11,5 @@ public partial class AccountMapper
 
     public partial Account ToEntity(CreateAccountDTO dto);
 
-    public partial void UpdateEntity(int id, UpdateAccountDTO dto, Account entity);
+    // public partial void UpdateEntity(int id, UpdateAccountDTO dto, Account entity);
 }
