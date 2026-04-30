@@ -1,5 +1,6 @@
 using HomeLedger.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace HomeLedger.API.Persistence;
 
@@ -15,6 +16,8 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
     public DbSet<Income> Incomes { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Account> Accounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +62,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Cascade);
 
             // 1:M
+            entity
+                .HasMany(e => e.Accounts)
+                .WithOne(e => e.Owner)
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity
                 .HasMany(e => e.Categories)
                 .WithOne(e => e.Owner)
@@ -138,18 +147,10 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.OwnerId).IsRequired();
 
-            entity.Property(e => e.CategoryId).IsRequired();
-
             entity
                 .HasOne(e => e.Owner)
                 .WithMany(u => u.OwnedBills)
                 .HasForeignKey(e => e.OwnerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity
-                .HasOne(e => e.Category)
-                .WithMany(c => c.Bills)
-                .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // M:M
@@ -171,8 +172,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
 
-            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
-
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
 
             entity.HasIndex(e => e.IsPaid).HasDatabaseName("IX_Bills_IsPaid");
@@ -190,6 +189,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.Property(e => e.Notes).HasMaxLength(500);
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
+            entity.Property(e => e.SourceHash);
 
             // Foreign key relationships
             entity
@@ -205,6 +205,9 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
+
+            entity.HasIndex(e => e.BillPaymentId).IsUnique().HasDatabaseName("uq_bill_payments");
+
             entity.HasIndex(e => e.BillId).HasDatabaseName("IX_BillPayments_BillId");
 
             entity.HasIndex(e => e.PaidById).HasDatabaseName("IX_BillPayments_PaidById");
@@ -303,10 +306,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Description).HasMaxLength(500);
 
-            entity.Property(e => e.IsRecurring).HasDefaultValue(false);
-
-            entity.Property(e => e.RecurringFrequency).HasConversion<int>();
-
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
 
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("NOW()");
@@ -330,8 +329,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Expenses_CategoryId");
 
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Expenses_Date");
-
-            entity.HasIndex(e => e.IsRecurring).HasDatabaseName("IX_Expenses_IsRecurring");
 
             entity
                 .HasIndex(e => new { e.OwnerId, e.Date })
@@ -366,22 +363,61 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity
-                .HasOne(e => e.Category)
-                .WithMany(c => c.Incomes)
-                .HasForeignKey(e => e.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");
-
-            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Incomes_CategoryId");
 
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Incomes_Date");
 
             entity.HasIndex(e => e.IsRecurring).HasDatabaseName("IX_Incomes_IsRecurring");
 
             entity.HasIndex(e => new { e.OwnerId, e.Date }).HasDatabaseName("IX_Incomes_User_Date");
+        });
+
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.HasKey(e => e.AccountId);
+
+            entity.Property(e => e.Name).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Currency);
+            entity.Property(e => e.AccountBalance).IsRequired().HasPrecision(18, 2);
+
+            entity
+                .HasOne(e => e.Owner)
+                .WithMany()
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasIndex(a => new { a.OwnerId, a.Name })
+                .IsUnique()
+                .HasDatabaseName("uq_account");
+        });
+
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionId);
+
+            entity.Property(e => e.Amount).IsRequired();
+            entity.Property(e => e.Date).IsRequired();
+            entity.Property(e => e.Description);
+
+            entity
+                .HasOne(e => e.Account)
+                .WithMany(a => a.Transactions)
+                .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasIndex(t => new
+                {
+                    t.AccountId,
+                    t.Date,
+                    t.Amount,
+                    t.Description,
+                })
+                .IsUnique()
+                .HasDatabaseName("uq_transaction");
         });
 
         // RefreshToken Configuration

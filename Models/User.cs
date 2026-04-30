@@ -21,6 +21,9 @@ public class User : BaseAuditableEntity
     public DateTime LastLogin { get; set; }
     public bool IsSuperUser { get; set; }
 
+    public int AccountId { get; set; }
+    public virtual ICollection<Account> Accounts { get; set; } = [];
+
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 
     // 1:1 -> a user may have one profile

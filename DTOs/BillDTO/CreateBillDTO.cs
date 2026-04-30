@@ -17,5 +17,4 @@ public class CreateBillDTO
 
     public virtual ICollection<User>? SharedWith { get; set; }
     public int OwnerId { get; set; }
-    public int CategoryId { get; set; }
 }

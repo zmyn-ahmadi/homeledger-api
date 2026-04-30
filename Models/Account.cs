@@ -5,7 +5,7 @@ public class Account : BaseAuditableEntity
     public int AccountId { get; set; }
     public required string Name { get; set; }
     public required string Type { get; set; }
-    public string? Currency { get; set; }
+    public string? Currency { get; set; } = "AUD";
     public decimal AccountBalance { get; set; }
 
     public int OwnerId { get; set; }

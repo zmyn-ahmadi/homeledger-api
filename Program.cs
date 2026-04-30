@@ -165,6 +165,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeLedger API v1");
+        options.EnablePersistAuthorization();
         options.RoutePrefix = "swagger";
     });
 }

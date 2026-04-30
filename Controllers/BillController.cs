@@ -6,6 +6,8 @@ namespace HomeLedger.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class BillController(IBillService billService) : ControllerBase
 {
     private readonly IBillService _service = billService;

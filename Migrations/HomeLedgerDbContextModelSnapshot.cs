@@ -44,6 +44,55 @@ namespace HomeLedger.API.Migrations
                     b.ToTable("BillShares", (string)null);
                 });
 
+            modelBuilder.Entity("HomeLedger.API.Models.Account", b =>
+                {
+                    b.Property<int>("AccountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AccountId"));
+
+                    b.Property<decimal>("AccountBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AccountId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("OwnerId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("uq_account");
+
+                    b.ToTable("Accounts");
+                });
+
             modelBuilder.Entity("HomeLedger.API.Models.Bill", b =>
                 {
                     b.Property<int>("BillId")
@@ -56,7 +105,7 @@ namespace HomeLedger.API.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
@@ -98,8 +147,7 @@ namespace HomeLedger.API.Migrations
 
                     b.HasKey("BillId");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("IX_Bills_CategoryId");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("DueDate")
                         .HasDatabaseName("IX_Bills_DueDate");
@@ -146,6 +194,10 @@ namespace HomeLedger.API.Migrations
                     b.Property<DateTime>("PaidDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("SourceHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -153,6 +205,10 @@ namespace HomeLedger.API.Migrations
 
                     b.HasIndex("BillId")
                         .HasDatabaseName("IX_BillPayments_BillId");
+
+                    b.HasIndex("BillPaymentId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_bill_payments");
 
                     b.HasIndex("PaidById")
                         .HasDatabaseName("IX_BillPayments_PaidById");
@@ -302,15 +358,7 @@ namespace HomeLedger.API.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsRecurring")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<int>("OwnerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RecurringFrequency")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -325,9 +373,6 @@ namespace HomeLedger.API.Migrations
 
                     b.HasIndex("Date")
                         .HasDatabaseName("IX_Expenses_Date");
-
-                    b.HasIndex("IsRecurring")
-                        .HasDatabaseName("IX_Expenses_IsRecurring");
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_Expenses_OwnerId");
@@ -350,7 +395,7 @@ namespace HomeLedger.API.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
@@ -394,8 +439,7 @@ namespace HomeLedger.API.Migrations
 
                     b.HasKey("IncomeId");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("IX_Incomes_CategoryId");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("Date")
                         .HasDatabaseName("IX_Incomes_Date");
@@ -461,6 +505,9 @@ namespace HomeLedger.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("UserId"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("BasiqUserId")
                         .HasColumnType("text");
@@ -578,6 +625,35 @@ namespace HomeLedger.API.Migrations
                     b.ToTable("WorkDays");
                 });
 
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("AccountId", "Date", "Amount", "Description")
+                        .IsUnique()
+                        .HasDatabaseName("uq_transaction");
+
+                    b.ToTable("Transactions");
+                });
+
             modelBuilder.Entity("BillShares", b =>
                 {
                     b.HasOne("HomeLedger.API.Models.Bill", null)
@@ -593,21 +669,32 @@ namespace HomeLedger.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HomeLedger.API.Models.Bill", b =>
+            modelBuilder.Entity("HomeLedger.API.Models.Account", b =>
                 {
-                    b.HasOne("HomeLedger.API.Models.Category", "Category")
-                        .WithMany("Bills")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("HomeLedger.API.Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("HomeLedger.API.Models.User", null)
+                        .WithMany("Accounts")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("HomeLedger.API.Models.Bill", b =>
+                {
+                    b.HasOne("HomeLedger.API.Models.Category", null)
+                        .WithMany("Bills")
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("HomeLedger.API.Models.User", "Owner")
                         .WithMany("OwnedBills")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Category");
 
                     b.Navigation("Owner");
                 });
@@ -682,11 +769,9 @@ namespace HomeLedger.API.Migrations
 
             modelBuilder.Entity("HomeLedger.API.Models.Income", b =>
                 {
-                    b.HasOne("HomeLedger.API.Models.Category", "Category")
+                    b.HasOne("HomeLedger.API.Models.Category", null)
                         .WithMany("Incomes")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("HomeLedger.API.Models.User", "Owner")
                         .WithMany()
@@ -697,8 +782,6 @@ namespace HomeLedger.API.Migrations
                     b.HasOne("HomeLedger.API.Models.User", null)
                         .WithMany("Incomes")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("Category");
 
                     b.Navigation("Owner");
                 });
@@ -734,6 +817,22 @@ namespace HomeLedger.API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.HasOne("HomeLedger.API.Models.Account", "Account")
+                        .WithMany("Transactions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("HomeLedger.API.Models.Account", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("HomeLedger.API.Models.Bill", b =>
                 {
                     b.Navigation("BillPayments");
@@ -752,6 +851,8 @@ namespace HomeLedger.API.Migrations
 
             modelBuilder.Entity("HomeLedger.API.Models.User", b =>
                 {
+                    b.Navigation("Accounts");
+
                     b.Navigation("BillPayments");
 
                     b.Navigation("Budgets");

@@ -6,9 +6,8 @@ public class Transaction
 
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
+    public string? Description { get; set; }
 
     public int AccountId { get; set; }
-    public Account? Account { get; set; }
-
-    public virtual Category? Category { get; set; }
+    public virtual Account Account { get; set; }
 }
