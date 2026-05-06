@@ -361,12 +361,19 @@ namespace HomeLedger.API.Migrations
                     b.Property<int>("OwnerId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SourceHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
                     b.HasKey("ExpenseId");
+
+                    b.HasAlternateKey("SourceHash")
+                        .HasName("uq_expense");
 
                     b.HasIndex("CategoryId")
                         .HasDatabaseName("IX_Expenses_CategoryId");
@@ -429,6 +436,9 @@ namespace HomeLedger.API.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("SourceHash")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -449,6 +459,10 @@ namespace HomeLedger.API.Migrations
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_Incomes_UserId");
+
+                    b.HasIndex("SourceHash")
+                        .IsUnique()
+                        .HasDatabaseName("uq_income");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_Incomes_UserId1");

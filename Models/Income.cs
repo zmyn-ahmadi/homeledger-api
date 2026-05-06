@@ -21,6 +21,8 @@ public class Income : BaseAuditableEntity
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency RecurringFrequency { get; set; }
 
+    public string? SourceHash { get; set; }
+
     // Relationships
 
     // M:1
