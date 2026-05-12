@@ -2,9 +2,9 @@ using System.Text;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Middleware;
 using HomeLedger.API.Persistence;
-using HomeLedger.API.Services.Basiq;
 using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
+using HomeLedger.API.Services.Correlation;
 using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
@@ -154,9 +154,29 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 
-builder.Services.AddHttpClient<BasiqServices>();
+// ----------------------------------------------
+// Allow services to access HttpContext (used for CorrelationId, etc.
+// ----------------------------------------------
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
+
+//builder.Services.AddHttpClient<BasiqServices>();
+
+// ----------------------------------------------
+// Logging Configuration
+// ----------------------------------------------
+
+// Remove default logging providers
+builder.Logging.ClearProviders();
+
+// log output to terminal
+builder.Logging.AddConsole();
+
+// debug window
+builder.Logging.AddDebug();
 
 var app = builder.Build();
+Console.WriteLine("App built...");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -169,6 +189,12 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
     });
 }
+
+// enforce HTTPS for all requests
+app.UseHttpsRedirection();
+
+// attach a Correlation ID to each request for tracing
+app.UseCorrelationId();
 
 app.UseMiddleware<CustomNotAcceptableMiddleware>();
 
