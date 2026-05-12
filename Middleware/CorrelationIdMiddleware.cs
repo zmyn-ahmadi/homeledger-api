@@ -5,36 +5,37 @@ namespace HomeLedger.API.Middleware;
 
 public class CorrelationIdMiddleware
 {
-  // The next Middleware in the request pipeline.
-  private readonly RequestDelegate _next;
-  // The HTTP header name used to carry the correlation ID.
-  private const string CorrelationIdHeader = "X-Correlation-ID";
+    // The next Middleware in the request pipeline.
+    private readonly RequestDelegate _next;
 
-  // Constructor injects the next delegate in the pipeline.
-  public CorrelationIdMiddleware(RequestDelegate next)
-  {
-    _next = next;
-  }
+    // The HTTP header name used to carry the correlation ID.
+    private const string CorrelationIdHeader = "X-Correlation-ID";
 
-  // Invoke once per HTTP request.
-  // Responsible for generating a Correlation ID and injecting it into:
-  // 1. The request header ( for downstream services )
-  // 2. The response header ( for clients )
-  public async Task InvokeAsync(HttpContext context, ILogger<CorrelationIdMiddleware> logger)
-  {
-    // Generate a new correlation iD for each request.
-    var correlationId = Guid.NewGuid().ToString().ToUpper();
+    // Constructor injects the next delegate in the pipeline.
+    public CorrelationIdMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
 
-    // store in HttpContext for downstream code
-    context.Items[CorrelationIdHeader] = correlationId;
+    // Invoke once per HTTP request.
+    // Responsible for generating a Correlation ID and injecting it into:
+    // 1. The request header ( for downstream services )
+    // 2. The response header ( for clients )
+    public async Task InvokeAsync(HttpContext context, ILogger<CorrelationIdMiddleware> logger)
+    {
+        // Generate a new correlation iD for each request.
+        var correlationId = Guid.NewGuid().ToString().ToUpperInvariant();
 
-    // Ensure the same correlation ID is returned to the client
-    // in the response header
-    context.Response.Headers[CorrelationIdHeader] = correlationId;
+        // store in HttpContext for downstream code
+        context.Items[CorrelationIdHeader] = correlationId;
 
-    // invoke the next middleware component
-    await _next(context);
-  }
+        // Ensure the same correlation ID is returned to the client
+        // in the response header
+        context.Response.Headers[CorrelationIdHeader] = correlationId;
+
+        // invoke the next middleware component
+        await _next(context);
+    }
 }
 
 // Extension method for registering the CorrelationIdMiddleware
@@ -42,10 +43,10 @@ public class CorrelationIdMiddleware
 // (app.UseCorrelationId())
 public static class CorrelationIdMiddlewareExtensions
 {
-  // Add the CorrelationIdMiddleware to the ASP.NET Core request pipeline.
+    // Add the CorrelationIdMiddleware to the ASP.NET Core request pipeline.
 
-  public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder builder)
-  {
-    return builder.UseMiddleware<CorrelationIdMiddleware>();
-  }
+    public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<CorrelationIdMiddleware>();
+    }
 }
