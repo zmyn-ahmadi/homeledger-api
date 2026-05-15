@@ -1,117 +1,57 @@
-using System.Diagnostics;
 using HomeLedger.API.DTOs.BillPaymentsDTO;
 using HomeLedger.API.Models;
 using HomeLedger.API.Services.BillPayments;
-using HomeLedger.API.Services.Correlation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeLedger.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class BillPaymentController : ControllerBase
+public class BillPaymentController(IBillPaymentService billPaymentService) : ControllerBase
 {
-    private readonly IBillPaymentService _service;
-    private readonly ICorrelationIdAccessor _correlationIdAccessor;
-    private readonly ILogger<BillPaymentController> _logger;
-
-    public BillPaymentController(
-        IBillPaymentService billPaymentService,
-        ILogger<BillPaymentController> logger,
-        ICorrelationIdAccessor correlationIdAccessor
-    )
-    {
-        _logger = logger;
-        _service = billPaymentService;
-        _correlationIdAccessor = correlationIdAccessor;
-        _logger.LogInformation("BillPaymentController instantiated.");
-    }
+    private readonly IBillPaymentService _service = billPaymentService;
 
     // GET: api/billpayments
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BillPaymentDTO>>> GetBillPayments()
     {
-        var correlationId = _correlationIdAccessor.GetCorrelationId();
-        using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["CorrelationId"] = correlationId }
-        );
-
-        var stopwatch = Stopwatch.StartNew();
-        _logger.LogInformation("HTTP GET /api/BillPayments called");
-
         var payments = await _service.GetAllAsync();
-        stopwatch.Stop();
-
-        var paymentsList = payments as IList<BillPaymentDTO> ?? payments.ToList();
-
-        if (paymentsList.Count == 0)
-        {
-            _logger.LogWarning(
-                "No BillPayments found. ElapsedMs={ElapsedMs}",
-                stopwatch.ElapsedMilliseconds
-            );
-            return NoContent();
-        }
-
-        _logger.LogInformation(
-            "Returned {Count} BillPayments. ElapsedMs={ElapsedMs}",
-            paymentsList.Count,
-            stopwatch.ElapsedMilliseconds
-        );
-        return Ok(paymentsList);
+        var paymentsList = payments as IList<BillPaymentDTO> ?? [.. payments];
+        return paymentsList.Count == 0 ? NoContent() : Ok(paymentsList);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BillPaymentDTO>> CreateBillPayment(CreateBillPaymentDTO request)
     {
-        await _service.AddAsync(request);
-        return CreatedAtAction(nameof(GetBillPayment), new { id = request.BillPaymentId }, request);
+        var created = await _service.AddAsync(request);
+        return CreatedAtAction(nameof(GetBillPayment), new { id = created.BillPaymentId }, created);
     }
 
-    [Authorize]
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<BillPayment>> GetBillPayment(int id)
     {
-        try
-        {
-            var payment = await _service.GetByIdAsync(id);
-            if (payment == null)
-                return NotFound();
-
-            return Ok(payment);
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine("Error retrieving BillPayment with id {id}.", id);
-            return StatusCode(500, new { message = "Internal server error.", error = ex.Message });
-        }
+        var payment = await _service.GetByIdAsync(id);
+        return payment is null ? NotFound() : Ok(payment);
     }
 
-    [Authorize]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateBillPayment(int id, UpdateBillPaymentDTO billPayment)
     {
-        if (id != billPayment.BillId)
-            return BadRequest();
+        // if (id != billPayment.BillPaymentId)
+        //     return BadRequest();
 
-        await _service.UpdateAsync(id, billPayment);
-        return NoContent();
+        var updated = await _service.UpdateAsync(id, billPayment);
+        return updated ? NoContent() : NotFound();
     }
 
-    [Authorize]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteBillPayment(int id)
     {
-        var payment = await _service.GetByIdAsync(id);
-        if (payment == null)
-            return NotFound();
-
-        await _service.DeleteAsync(id);
-        return NoContent();
+        var deleted = await _service.DeleteAsync(id);
+        return deleted ? NoContent() : NotFound();
     }
 }

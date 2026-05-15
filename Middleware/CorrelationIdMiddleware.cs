@@ -33,8 +33,12 @@ public class CorrelationIdMiddleware
         // in the response header
         context.Response.Headers[CorrelationIdHeader] = correlationId;
 
-        // invoke the next middleware component
-        await _next(context);
+        using (
+            logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId })
+        )
+
+            // invoke the next middleware component
+            await _next(context);
     }
 }
 

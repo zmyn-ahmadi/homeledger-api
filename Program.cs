@@ -9,6 +9,7 @@ using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -203,5 +204,26 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.UseExceptionHandler(errorApp =>
+    errorApp.Run(async context =>
+    {
+        var ex = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        var (status, message) = ex switch
+        {
+            KeyNotFoundException => (404, "Not Found"),
+            ArgumentException => (400, ex.Message),
+            _ => (500, "Internal server error"),
+        };
+
+        if (status == 500)
+            logger.LogError(ex, "Unhandled exception for {Path}", context.Request.Path);
+
+        context.Response.StatusCode = status;
+        await context.Response.WriteAsJsonAsync(new { error = message });
+    })
+);
 
 app.Run();
