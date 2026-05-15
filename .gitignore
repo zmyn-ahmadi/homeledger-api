@@ -61,5 +61,5 @@ secrets.json
 local.settings.json
 
 # migrations files
-./Migrations/*
-./MigrationScript.sql
+Migrations/
+MigrationScript.sql
