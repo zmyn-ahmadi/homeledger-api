@@ -5,30 +5,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeLedger.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class BillController(IBillService billService, ILogger<BillPaymentService> logger)
-    : ControllerBase
+public class BillController(IBillService billService) : ControllerBase
 {
     private readonly IBillService _service = billService;
-    private readonly ILogger<BillPaymentService> _logger = logger;
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<BillDTO>> GetBills()
     {
         var bills = await _service.GetAllAsync();
-        if (!bills.Any())
-            return NoContent();
+        var billsList = bills as IList<BillDTO> ?? [.. bills];
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(bills);
+        return billsList.Count == 0 ? NoContent() : Ok(billsList);
     }
 
-    [Authorize]
     [HttpGet("id:int")]
     public async Task<ActionResult<BillDTO>> GetBill(int id)
     {
@@ -42,7 +38,6 @@ public class BillController(IBillService billService, ILogger<BillPaymentService
         return Ok(bill);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BillDTO>> PostBill([FromBody] CreateBillDTO createBill)
     {
@@ -56,7 +51,6 @@ public class BillController(IBillService billService, ILogger<BillPaymentService
         return CreatedAtAction(nameof(GetBill), new { id = newBill.BillId }, newBill);
     }
 
-    [Authorize]
     [HttpPut("id:int")]
     public async Task<ActionResult<BillDTO>> PutBill(
         [FromRoute] int id,
@@ -70,10 +64,9 @@ public class BillController(IBillService billService, ILogger<BillPaymentService
             return BadRequest(ModelState);
 
         var updatedBill = await _service.UpdateAsync(id, updateBill);
-        return Ok(updatedBill);
+        return updatedBill ? NoContent() : NotFound();
     }
 
-    [Authorize]
     [HttpDelete("id:int")]
     public async Task<ActionResult<bool>> DeleteBill([FromRoute] int id)
     {

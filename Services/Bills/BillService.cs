@@ -1,55 +1,97 @@
 using HomeLedger.API.DTOs.BillDTO;
 using HomeLedger.API.Mappers;
 
-public class BillService(IUnitOfWork uow, BillMapper mapper) : IBillService
+public class BillService : IBillService
 {
-    private readonly BillMapper _mapper = mapper;
+    private readonly IUnitOfWork _uow;
+    private readonly BillMapper _mapper;
+    private readonly ILogger<BillService> _logger;
+
+    public BillService(IUnitOfWork uow, BillMapper mapper, ILogger<BillService> logger)
+    {
+        _uow = uow;
+        _mapper = mapper;
+        _logger = logger;
+    }
 
     public async Task<BillDTO> AddAsync(CreateBillDTO request)
     {
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+        );
+
         // map the req to Bill obj
         var newBill = _mapper.ToEntity(request);
-
         newBill.CreatedAt = DateTime.UtcNow;
         newBill.IsActive = true;
 
-        await uow.Bills.AddAsync(newBill);
-        await uow.CommitAsync();
+        await _uow.Bills.AddAsync(newBill);
+        await _uow.CommitAsync();
+
+        _logger.LogInformation(
+            "Created Bill {BillId} for user {OwnerId}",
+            newBill.BillId,
+            newBill.OwnerId
+        );
 
         return _mapper.ToDto(newBill);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var result = await uow.Bills.DeleteAsync(id);
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["BillId"] = id });
+
+        var result = await _uow.Bills.DeleteAsync(id);
         if (result)
-            await uow.CommitAsync();
+        {
+            await _uow.CommitAsync();
+            _logger.LogInformation("Deleted Bill {BillId}", id);
+        }
+        else
+        {
+            _logger.LogWarning("Bill: {BillId} not found for deletion", id);
+        }
+
         return result;
     }
 
     public async Task<IEnumerable<BillDTO>> GetAllAsync()
     {
-        var bills = await uow.Bills.GetAllAsync();
-        return bills.Select(_mapper.ToDto);
+        var bills = await _uow.Bills.GetAllAsync();
+        return [.. bills.Select(_mapper.ToDto)];
     }
 
     public async Task<BillDTO> GetByIdAsync(int id)
     {
-        var bill = await uow.Bills.GetByIdAsync(id);
+        var bill = await _uow.Bills.GetByIdAsync(id);
+
+        if (bill is null)
+        {
+            _logger.LogWarning("Bill: {BillId} not found.", id);
+            return null;
+        }
+
         return _mapper.ToDto(bill);
     }
 
     public async Task<bool> UpdateAsync(int id, UpdateBillDTO request)
     {
-        var existingBill =
-            await uow.Bills.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Bill with ID: {id} not found.");
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["BillId"] = id });
+
+        var existingBill = await _uow.Bills.GetByIdAsync(id);
+        if (existingBill is null)
+        {
+            _logger.LogWarning("BillId not found for update", id);
+            return false;
+        }
 
         _mapper.UpdateEntity(request, existingBill);
         existingBill.UpdatedAt = DateTime.UtcNow;
 
-        await uow.Bills.UpdateAsync(existingBill);
-        await uow.CommitAsync();
+        await _uow.Bills.UpdateAsync(existingBill);
+        await _uow.CommitAsync();
+
+        _logger.LogInformation("Updated Bill {BillId}", id);
 
         return true;
     }

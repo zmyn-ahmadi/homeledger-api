@@ -5,7 +5,7 @@ using HomeLedger.API.Services.BillPayments;
 public class BillPaymentService(
     IUnitOfWork uow,
     BillPaymentMapper mapper,
-    ILogger<BillPaymentService> logger,
+    ILogger<BillPaymentService> logger
 ) : IBillPaymentService
 {
     private readonly BillPaymentMapper _mapper = mapper;
@@ -13,37 +13,29 @@ public class BillPaymentService(
 
     public async Task<BillPaymentDTO> AddAsync(CreateBillPaymentDTO request)
     {
-        // Retrieve the current CorrelationId (if any) using the shared helper.
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object>
-            {
-                ["BillId"] = request.BillId,
-            }
+            new Dictionary<string, object> { ["BillId"] = request.BillId }
         );
-          var newPayment = _mapper.ToEntity(request);
-          newPayment.CreatedAt = DateTime.UtcNow;
-          newPayment.IsActive = true;
 
-          await uow.BillPayments.AddAsync(newPayment);
-          await uow.CommitAsync();
+        var newPayment = _mapper.ToEntity(request);
+        newPayment.CreatedAt = DateTime.UtcNow;
+        newPayment.IsActive = true;
 
-          _logger.LogInformation(
-              "Created BillPayment {PaymentId} for BillId {BillId}",
-              newPayment.BillPaymentId,
-              request.BillId
-          );
+        await uow.BillPayments.AddAsync(newPayment);
+        await uow.CommitAsync();
 
-          return _mapper.ToDto(newPayment);
+        _logger.LogInformation(
+            "Created BillPayment {PaymentId} for BillId {BillId}",
+            newPayment.BillPaymentId,
+            request.BillId
+        );
+
+        return _mapper.ToDto(newPayment);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        using var scope = _logger.BeginScope(
-            new Dictionary<string, object>
-            {
-                ["PaymentId"] = id,
-            }
-        );
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["PaymentId"] = id });
 
         var result = await uow.BillPayments.DeleteAsync(id);
         if (result)
@@ -70,7 +62,8 @@ public class BillPaymentService(
         _logger.LogDebug("Fetching BillPayment {BillPaymentId}", id);
         var payment = await uow.BillPayments.GetByIdAsync(id);
 
-        if (payment is null){
+        if (payment is null)
+        {
             _logger.LogWarning("BillPaymentId {BillPaymentId} not found", id);
             return null;
         }
@@ -81,10 +74,7 @@ public class BillPaymentService(
     public async Task<bool> UpdateAsync(int id, UpdateBillPaymentDTO request)
     {
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object>
-            {
-                ["BillPaymentId"] = id,
-            }
+            new Dictionary<string, object> { ["BillPaymentId"] = id }
         );
 
         // Get existing
