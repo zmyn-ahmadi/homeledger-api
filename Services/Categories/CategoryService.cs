@@ -4,7 +4,7 @@ using HomeLedger.API.Mappers;
 namespace HomeLedger.API.Services.Categories;
 
 public class CategoryService(
-    IUnitOfWork uow,
+    IUnitOfWork _uow,
     CategoryMapper mapper,
     ILogger<CategoryService> logger
 ) : ICategoryService
@@ -14,13 +14,13 @@ public class CategoryService(
 
     public async Task<IEnumerable<CategoryDTO>> GetAllAsync()
     {
-        var categories = await uow.Categories.GetAllAsync();
+        var categories = await _uow.Categories.GetAllAsync();
         return [.. categories.Select(_mapper.ToDto)];
     }
 
     public async Task<CategoryDTO?> GetByIdAsync(int id)
     {
-        var category = await uow.Categories.GetByIdAsync(id);
+        var category = await _uow.Categories.GetByIdAsync(id);
         if (category is null)
         {
             _logger.LogWarning("Category: {CategoryId} not found.", id);
@@ -36,7 +36,7 @@ public class CategoryService(
         );
 
         var normalizedName = request.Name.Trim().ToLower();
-        if (await uow.Categories.NameExistsAsync(normalizedName, request.OwnerId))
+        if (await _uow.Categories.NameExistsAsync(normalizedName, request.OwnerId))
         {
             _logger.LogWarning("Category {Name} already exists", request.Name);
             throw new InvalidOperationException($"Category '{request.Name}' already exists.");
@@ -46,8 +46,8 @@ public class CategoryService(
         newCat.CreatedAt = DateTime.UtcNow;
         newCat.IsActive = true;
 
-        await uow.Categories.AddAsync(newCat);
-        await uow.CommitAsync();
+        await _uow.Categories.AddAsync(newCat);
+        await _uow.CommitAsync();
 
         _logger.LogInformation(
             "Created Category: {CategoryId} for user {OwnerId}",
@@ -61,10 +61,10 @@ public class CategoryService(
     public async Task<bool> UpdateAsync(int id, UpdateCategoryDTO request)
     {
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["CategoryId"] = id }
         );
 
-        var existing = await uow.Categories.GetByIdAsync(id);
+        var existing = await _uow.Categories.GetByIdAsync(id);
         if (existing is null)
         {
             _logger.LogWarning("{CategoryId} not found for update", id);
@@ -74,14 +74,14 @@ public class CategoryService(
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
             var normalizedName = request.Name.Trim().ToLower();
-            var categoryExists = await uow.Categories.NameExistsAsync(
+            var categoryExists = await _uow.Categories.NameExistsAsync(
                 normalizedName,
                 existing.OwnerId
             );
             if (categoryExists)
             {
                 _logger.LogWarning("{CategoryName} already exists", request.Name);
-                throw new InvalidOperationException($"Category '{request.Name}' already exists.");
+                return false;
             }
         }
 
@@ -93,7 +93,7 @@ public class CategoryService(
 
         _logger.LogInformation("Updated category {CategoryId}", id);
 
-        return _mapper.ToDto(existing);
+        return true;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -102,10 +102,10 @@ public class CategoryService(
             new Dictionary<string, object> { ["CategoryId"] = id }
         );
 
-        var result = await uow.Categories.DeleteAsync(id);
+        var result = await _uow.Categories.DeleteAsync(id);
         if (result)
         {
-            await uow.CommitAsync();
+            await _uow.CommitAsync();
             _logger.LogInformation("Deleted Category {CategoryId}", id);
         }
         else
@@ -118,6 +118,6 @@ public class CategoryService(
 
     public Task<bool> ExistsAsync(int id)
     {
-        return uow.Categories.ExistsAsync(id);
+        return _uow.Categories.ExistsAsync(id);
     }
 }

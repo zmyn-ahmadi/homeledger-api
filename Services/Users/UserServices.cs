@@ -9,7 +9,7 @@ public class UserServices(IUnitOfWork _uow, UserMapper mapper, ILogger<UserServi
     : IUserServices
 {
     private readonly UserMapper _mapper = mapper;
-    private readonly ILogger<UserService> _logger = logger;
+    private readonly ILogger<UserServices> _logger = logger;
 
     public IQueryable<User> GetUserQueryAble()
     {
