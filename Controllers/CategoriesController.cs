@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeLedger.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
@@ -13,22 +14,23 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
 {
     private readonly ICategoryService _service = cateogryService;
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
     {
         var categories = await _service.GetAllAsync();
-        if (!categories.Any())
-            return NoContent();
+        var categoriesList = categories as IList<CategoryDTO> ?? [.. categories];
 
-        return Ok(categories);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        return categoriesList.Count == 0 ? NoContent() : Ok(categoriesList);
     }
 
-    [Authorize]
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
     {
         var category = await _service.GetByIdAsync(id);
+
         if (category == null)
             return NotFound(new { Message = $"Category with ID {id} not found." });
 
@@ -38,7 +40,6 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         return Ok(category);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<CategoryDTO>> PostCategory(
         [FromBody] CreateCategoryDTO createCategory
@@ -59,7 +60,6 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
         );
     }
 
-    [Authorize]
     [HttpPut("id:int")]
     public async Task<ActionResult<CategoryDTO>> PutCategory(
         [FromRoute] int id,
@@ -73,10 +73,9 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
             return BadRequest(ModelState);
 
         var updatedCategory = await _service.UpdateAsync(id, updateCategory);
-        return Ok(updatedCategory);
+        return updatedCategory ? NoContent() : NotFound();
     }
 
-    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<bool>> DeleteCategory([FromRoute] int id)
     {
