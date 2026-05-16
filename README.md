@@ -1,6 +1,7 @@
-2 - setup Logger - read the article - use ILogger + Serilog + Seq
+1 - setup Logger -
+a - setup built-in logger - setup custom logger + Serilog + Seq
 
-1 - Test:
+2 - Test:
 a - Unit testing
 b - integration testing
 c - test driven development
