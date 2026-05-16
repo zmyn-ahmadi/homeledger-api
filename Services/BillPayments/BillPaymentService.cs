@@ -3,7 +3,7 @@ using HomeLedger.API.Mappers;
 using HomeLedger.API.Services.BillPayments;
 
 public class BillPaymentService(
-    IUnitOfWork uow,
+    IUnitOfWork _uow,
     BillPaymentMapper mapper,
     ILogger<BillPaymentService> logger
 ) : IBillPaymentService
@@ -21,8 +21,8 @@ public class BillPaymentService(
         newPayment.CreatedAt = DateTime.UtcNow;
         newPayment.IsActive = true;
 
-        await uow.BillPayments.AddAsync(newPayment);
-        await uow.CommitAsync();
+        await _uow.BillPayments.AddAsync(newPayment);
+        await _uow.CommitAsync();
 
         _logger.LogInformation(
             "Created BillPayment {PaymentId} for BillId {BillId}",
@@ -37,10 +37,10 @@ public class BillPaymentService(
     {
         using var scope = _logger.BeginScope(new Dictionary<string, object> { ["PaymentId"] = id });
 
-        var result = await uow.BillPayments.DeleteAsync(id);
+        var result = await _uow.BillPayments.DeleteAsync(id);
         if (result)
         {
-            await uow.CommitAsync();
+            await _uow.CommitAsync();
             _logger.LogInformation("Deleted BillPayment {BillPaymentId}", id);
         }
         else
@@ -53,14 +53,13 @@ public class BillPaymentService(
 
     public async Task<IEnumerable<BillPaymentDTO>> GetAllAsync()
     {
-        var payments = await uow.BillPayments.GetAllAsync();
+        var payments = await _uow.BillPayments.GetAllAsync();
         return [.. payments.Select(_mapper.ToDto)];
     }
 
-    public async Task<BillPaymentDTO> GetByIdAsync(int id)
+    public async Task<BillPaymentDTO?> GetByIdAsync(int id)
     {
-        _logger.LogDebug("Fetching BillPayment {BillPaymentId}", id);
-        var payment = await uow.BillPayments.GetByIdAsync(id);
+        var payment = await _uow.BillPayments.GetByIdAsync(id);
 
         if (payment is null)
         {
@@ -78,7 +77,7 @@ public class BillPaymentService(
         );
 
         // Get existing
-        var existingPayment = await uow.BillPayments.GetByIdAsync(id);
+        var existingPayment = await _uow.BillPayments.GetByIdAsync(id);
         if (existingPayment is null)
         {
             _logger.LogWarning("BillPaymentId {BillPaymentId} not found for update", id);
@@ -89,8 +88,8 @@ public class BillPaymentService(
         _mapper.UpdateEntity(request, existingPayment);
         existingPayment.UpdatedAt = DateTime.UtcNow;
 
-        await uow.BillPayments.UpdateAsync(existingPayment);
-        await uow.CommitAsync();
+        await _uow.BillPayments.UpdateAsync(existingPayment);
+        await _uow.CommitAsync();
 
         _logger.LogInformation("Updated BillPaymentId {BillPaymentId}", id);
 
