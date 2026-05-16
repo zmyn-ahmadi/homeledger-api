@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="HomeLedger.API.IntegrationTests/HomeLedger.API.IntegrationTests.csproj" />
+  <Project Path="HomeLedger.API.UnitTests/HomeLedger.API.UnitTests.csproj" />
+  <Project Path="HomeLedger.API/HomeLedger.API.csproj" />
+</Solution>

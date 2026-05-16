@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HomeLedger.API\HomeLedger.API.csproj" />
+  </ItemGroup>
+
 </Project>
