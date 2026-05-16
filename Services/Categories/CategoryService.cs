@@ -3,27 +3,44 @@ using HomeLedger.API.Mappers;
 
 namespace HomeLedger.API.Services.Categories;
 
-public class CategoryService(IUnitOfWork uow, CategoryMapper mapper) : ICategoryService
+public class CategoryService(
+    IUnitOfWork uow,
+    CategoryMapper mapper,
+    ILogger<CategoryService> logger
+) : ICategoryService
 {
     private readonly CategoryMapper _mapper = mapper;
+    private readonly ILogger<CategoryService> _logger = logger;
 
     public async Task<IEnumerable<CategoryDTO>> GetAllAsync()
     {
         var categories = await uow.Categories.GetAllAsync();
-        return categories.Select(_mapper.ToDto);
+        return [.. categories.Select(_mapper.ToDto)];
     }
 
-    public async Task<CategoryDTO> GetByIdAsync(int id)
+    public async Task<CategoryDTO?> GetByIdAsync(int id)
     {
         var category = await uow.Categories.GetByIdAsync(id);
+        if (category is null)
+        {
+            _logger.LogWarning("Category: {CategoryId} not found.", id);
+            return null;
+        }
         return _mapper.ToDto(category);
     }
 
     public async Task<CategoryDTO> AddAsync(CreateCategoryDTO request)
     {
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+        );
+
         var normalizedName = request.Name.Trim().ToLower();
         if (await uow.Categories.NameExistsAsync(normalizedName, request.OwnerId))
+        {
+            _logger.LogWarning("Category {Name} already exists", request.Name);
             throw new InvalidOperationException($"Category '{request.Name}' already exists.");
+        }
 
         var newCat = _mapper.ToEntity(request);
         newCat.CreatedAt = DateTime.UtcNow;
@@ -32,14 +49,27 @@ public class CategoryService(IUnitOfWork uow, CategoryMapper mapper) : ICategory
         await uow.Categories.AddAsync(newCat);
         await uow.CommitAsync();
 
+        _logger.LogInformation(
+            "Created Category: {CategoryId} for user {OwnerId}",
+            newCat.CategoryId,
+            newCat.OwnerId
+        );
+
         return _mapper.ToDto(newCat);
     }
 
-    public async Task<CategoryDTO> UpdateAsync(int id, UpdateCategoryDTO request)
+    public async Task<bool> UpdateAsync(int id, UpdateCategoryDTO request)
     {
-        var existing =
-            await uow.Categories.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Category with ID {id} not found.");
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+        );
+
+        var existing = await uow.Categories.GetByIdAsync(id);
+        if (existing is null)
+        {
+            _logger.LogWarning("{CategoryId} not found for update", id);
+            return false;
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
@@ -49,23 +79,40 @@ public class CategoryService(IUnitOfWork uow, CategoryMapper mapper) : ICategory
                 existing.OwnerId
             );
             if (categoryExists)
+            {
+                _logger.LogWarning("{CategoryName} already exists", request.Name);
                 throw new InvalidOperationException($"Category '{request.Name}' already exists.");
+            }
         }
 
         _mapper.UpdateEntity(request, existing);
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await uow.Categories.UpdateAsync(existing);
-        await uow.CommitAsync();
+        await _uow.Categories.UpdateAsync(existing);
+        await _uow.CommitAsync();
+
+        _logger.LogInformation("Updated category {CategoryId}", id);
 
         return _mapper.ToDto(existing);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["CategoryId"] = id }
+        );
+
         var result = await uow.Categories.DeleteAsync(id);
         if (result)
+        {
             await uow.CommitAsync();
+            _logger.LogInformation("Deleted Category {CategoryId}", id);
+        }
+        else
+        {
+            _logger.LogWarning("Category: {CategoryId} not found for deletion", id);
+        }
+
         return result;
     }
 
