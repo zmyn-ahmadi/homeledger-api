@@ -26,7 +26,7 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
     }
 
     [HttpGet("id:int")]
-    public async Task<ActionResult<BudgetDTO>> GetBudget(int id)
+    public async Task<ActionResult<BudgetDTO?>> GetBudget(int id)
     {
         var budget = await _service.GetByIdAsync(id);
         if (budget == null)

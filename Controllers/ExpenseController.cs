@@ -3,28 +3,28 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class ExpenseController(IExpenseService expenseService) : ControllerBase
 {
     private readonly IExpenseService _service = expenseService;
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<ExpenseDTO>> GetExpenses()
     {
         var expenses = await _service.GetAllAsync();
-        if (!expenses.Any())
-            return NoContent();
+        var expensesList = expenses as IList<ExpenseDTO> ?? [.. expenses];
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(expenses);
+        return expensesList.Count == 0 ? NoContent() : Ok(expensesList);
     }
 
-    [Authorize]
     [HttpGet("id:int")]
-    public async Task<ActionResult<ExpenseDTO>> GetExpense(int id)
+    public async Task<ActionResult<ExpenseDTO?>> GetExpense(int id)
     {
         var expense = await _service.GetByIdAsync(id);
         if (expense == null)
@@ -36,7 +36,6 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
         return Ok(expense);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<ExpenseDTO>> PostExpense(
         [FromBody] CreateExpenseDTO createExpense
@@ -52,7 +51,6 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
         return CreatedAtAction(nameof(GetExpense), new { id = newExpense.ExpenseId }, newExpense);
     }
 
-    [Authorize]
     [HttpPut("id:int")]
     public async Task<ActionResult<ExpenseDTO>> PutExpense(
         [FromRoute] int id,
@@ -66,7 +64,7 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
             return BadRequest(ModelState);
 
         var updatedExpense = await _service.UpdateAsync(id, updateExpense);
-        return Ok(updatedExpense);
+        return updatedExpense ? NoContent() : NotFound();
     }
 
     [Authorize]

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeLedger.API.Controllers;
 
 [ApiController]
+[Authorize(Policy = "SuperUserOnly")]
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
@@ -32,7 +33,6 @@ public class UserController(IUserServices userServices) : ControllerBase
     /// </summary>
     /// <return>Users</return>
     // [Authorize(Policy = "SuperUserOnly")]
-    [Authorize(Policy = "SuperUserOnly")]
     [HttpGet()]
     public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
     {
@@ -40,7 +40,6 @@ public class UserController(IUserServices userServices) : ControllerBase
         return Ok(users);
     }
 
-    [Authorize(Policy = "SuperUserOnly")]
     [HttpGet("{id:int}")]
     public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int id)
     {
@@ -74,7 +73,6 @@ public class UserController(IUserServices userServices) : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Policy = "SuperUserOnly")]
     [HttpPost]
     public async Task<ActionResult<UserDTO>> PostUser([FromBody] CreateUserDTO createUser)
     {
@@ -89,7 +87,6 @@ public class UserController(IUserServices userServices) : ControllerBase
         return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
     }
 
-    [Authorize(Policy = "SuperUserOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> PutUser(
         [FromRoute] int id,
@@ -106,7 +103,6 @@ public class UserController(IUserServices userServices) : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = "SuperUserOnly")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteUser([FromRoute] int id)
     {

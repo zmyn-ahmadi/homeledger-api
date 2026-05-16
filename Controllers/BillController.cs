@@ -26,7 +26,7 @@ public class BillController(IBillService billService) : ControllerBase
     }
 
     [HttpGet("id:int")]
-    public async Task<ActionResult<BillDTO>> GetBill(int id)
+    public async Task<ActionResult<BillDTO?>> GetBill(int id)
     {
         var bill = await _service.GetByIdAsync(id);
         if (bill == null)

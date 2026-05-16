@@ -4,26 +4,26 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class IncomeController(IIncomeService incomeService) : ControllerBase
 {
     private readonly IIncomeService _service = incomeService;
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IncomeDTO>> GetIncomes()
     {
         var incomes = await _service.GetAllAsync();
-        if (!incomes.Any())
-            return NoContent();
+        var incomesList = incomes as IList<IncomeDTO> ?? [.. incomes];
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(incomes);
+        return incomesList.Count == 0 ? NoContent() : Ok(incomesList);
     }
 
-    [Authorize]
     [HttpGet("id:int")]
     public async Task<ActionResult<IncomeDTO>> GetIncome(int id)
     {
@@ -37,7 +37,6 @@ public class IncomeController(IIncomeService incomeService) : ControllerBase
         return Ok(income);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<IncomeDTO>> PostIncome([FromBody] CreateIncomeDTO createIncome)
     {
@@ -51,7 +50,6 @@ public class IncomeController(IIncomeService incomeService) : ControllerBase
         return CreatedAtAction(nameof(GetIncome), new { id = newIncome.IncomeId }, newIncome);
     }
 
-    [Authorize]
     [HttpPut("id:int")]
     public async Task<ActionResult<IncomeDTO>> PutIncome(
         [FromRoute] int id,
@@ -65,10 +63,9 @@ public class IncomeController(IIncomeService incomeService) : ControllerBase
             return BadRequest(ModelState);
 
         var updatedIncome = await _service.UpdateAsync(id, updateIncome);
-        return Ok(updatedIncome);
+        return updatedIncome ? NoContent() : NotFound();
     }
 
-    [Authorize]
     [HttpDelete("id:int")]
     public async Task<ActionResult<bool>> DeleteIncome([FromRoute] int id)
     {

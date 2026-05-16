@@ -27,7 +27,7 @@ public class CategoriesController(ICategoryService cateogryService) : Controller
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+    public async Task<ActionResult<CategoryDTO?>> GetCategory(int id)
     {
         var category = await _service.GetByIdAsync(id);
 

@@ -32,7 +32,7 @@ public class BillPaymentController(IBillPaymentService billPaymentService) : Con
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<BillPayment>> GetBillPayment(int id)
+    public async Task<ActionResult<BillPayment?>> GetBillPayment(int id)
     {
         var payment = await _service.GetByIdAsync(id);
         return payment is null ? NotFound() : Ok(payment);
