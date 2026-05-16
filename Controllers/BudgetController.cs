@@ -5,26 +5,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeLedger.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class BudgetController(IBudgetService budgetService) : ControllerBase
 {
     private readonly IBudgetService _service = budgetService;
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<BudgetDTO>> GetBudgets()
     {
         var budgets = await _service.GetAllAsync();
-        if (!budgets.Any())
-            return NoContent();
+        var budgetsList = budgets as IList<BudgetDTO> ?? [.. budgets];
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(budgets);
+        return budgetsList.Count == 0 ? NoContent() : Ok(budgetsList);
     }
 
-    [Authorize]
     [HttpGet("id:int")]
     public async Task<ActionResult<BudgetDTO>> GetBudget(int id)
     {
@@ -38,7 +38,6 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
         return Ok(budget);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BudgetDTO>> PostBudget([FromBody] CreateBudgetDTO createBudget)
     {
@@ -52,7 +51,6 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
         return CreatedAtAction(nameof(GetBudget), new { id = newBudget.BudgetId }, newBudget);
     }
 
-    [Authorize]
     [HttpPut("id:int")]
     public async Task<ActionResult<BudgetDTO>> PutBudget(
         [FromRoute] int id,
@@ -66,10 +64,9 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
             return BadRequest(ModelState);
 
         var updatedBudget = await _service.UpdateAsync(id, updateBudget);
-        return Ok(updatedBudget);
+        return updatedBudget ? NoContent() : NotFound();
     }
 
-    [Authorize]
     [HttpDelete("id:int")]
     public async Task<ActionResult<bool>> DeleteBudget([FromRoute] int id)
     {
