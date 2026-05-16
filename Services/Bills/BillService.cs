@@ -1,18 +1,11 @@
 using HomeLedger.API.DTOs.BillDTO;
 using HomeLedger.API.Mappers;
 
-public class BillService : IBillService
+public class BillService(IUnitOfWork _uow, BillMapper mapper, ILogger<BillService> logger)
+    : IBillService
 {
-    private readonly IUnitOfWork _uow;
-    private readonly BillMapper _mapper;
-    private readonly ILogger<BillService> _logger;
-
-    public BillService(IUnitOfWork uow, BillMapper mapper, ILogger<BillService> logger)
-    {
-        _uow = uow;
-        _mapper = mapper;
-        _logger = logger;
-    }
+    private readonly BillMapper _mapper = mapper;
+    private readonly ILogger<BillService> _logger = logger;
 
     public async Task<BillDTO> AddAsync(CreateBillDTO request)
     {
@@ -61,7 +54,7 @@ public class BillService : IBillService
         return [.. bills.Select(_mapper.ToDto)];
     }
 
-    public async Task<BillDTO> GetByIdAsync(int id)
+    public async Task<BillDTO?> GetByIdAsync(int id)
     {
         var bill = await _uow.Bills.GetByIdAsync(id);
 
