@@ -1,4 +1,6 @@
 using HomeLedger.API.Models;
 using HomeLedger.API.Persistence;
 
-public class ExpenseRepository(HomeLedgerDbContext context) : Repository<Expense>(context) { }
+public class ExpenseRepository(HomeLedgerDbContext context)
+    : Repository<Expense>(context),
+        IExpenseRepository { }
