@@ -48,7 +48,8 @@ public class BudgetService(IUnitOfWork _uow, BudgetMapper mapper, ILogger<Budget
     public async Task<IEnumerable<BudgetDTO>> GetAllAsync()
     {
         var budgets = await _uow.Budgets.GetAllAsync();
-        return [.. budgets.Select(_mapper.ToDto)];
+        var activeBudgets = budgets.Where(b => b.IsActive == true);
+        return [.. activeBudgets.Select(_mapper.ToDto)];
     }
 
     public async Task<BudgetDTO?> GetByIdAsync(int id)

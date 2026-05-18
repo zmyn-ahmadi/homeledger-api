@@ -189,7 +189,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.Property(e => e.Notes).HasMaxLength(500);
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
-            entity.Property(e => e.SourceHash);
 
             // Foreign key relationships
             entity
@@ -306,8 +305,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Description).HasMaxLength(500);
 
-            entity.Property(e => e.SourceHash);
-
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
 
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("NOW()");
@@ -328,8 +325,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             // Indexes
 
             // entity.HasIndex(e => e.ExpenseId).IsUnique().HasDatabaseName("uq_expense");
-            entity.HasAlternateKey(e => e.SourceHash).HasName("uq_expense");
-
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Expenses_OwnerId");
 
             entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Expenses_CategoryId");
@@ -354,8 +349,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Description).HasMaxLength(500);
 
-            entity.Property(e => e.SourceHash);
-
             entity.Property(e => e.IsRecurring).HasDefaultValue(false);
 
             entity.Property(e => e.RecurringFrequency).HasConversion<int>();
@@ -372,8 +365,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
-            entity.HasIndex(e => e.SourceHash).IsUnique().HasDatabaseName("uq_income");
-
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");
 
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Incomes_Date");
