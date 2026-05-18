@@ -15,7 +15,6 @@ public class Expense : BaseAuditableEntity
     public DateTime Date { get; set; }
 
     public string? Description { get; set; }
-    public string? SourceHash { get; set; }
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
     public int CategoryId { get; set; }

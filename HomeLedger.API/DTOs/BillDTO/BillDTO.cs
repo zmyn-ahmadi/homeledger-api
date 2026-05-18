@@ -2,7 +2,7 @@ using HomeLedger.API.Models;
 
 namespace HomeLedger.API.DTOs.BillDTO;
 
-public class BillDTO
+public class BillDTO : BaseAuditableEntity
 {
     public int BillId { get; set; }
 

@@ -7,6 +7,16 @@ public class UnitOfWork : IUnitOfWork
     private readonly HomeLedgerDbContext _context;
     private readonly Dictionary<Type, object> _repositories = [];
 
+    public ICategoryRepository Categories { get; }
+    public IUserRepository Users { get; }
+    public IBillPaymentRepository BillPayments { get; }
+    public IBillRepository Bills { get; }
+    public IBudgetRepository Budgets { get; }
+    public IExpenseRepository Expenses { get; }
+    public IIncomeRepository Incomes { get; }
+    public TransactionRepository Transactions { get; set; }
+    public AccountRepository Accounts { get; set; }
+
     public UnitOfWork(HomeLedgerDbContext context)
     {
         _context = context;
@@ -20,16 +30,6 @@ public class UnitOfWork : IUnitOfWork
         Transactions = new TransactionRepository(_context);
         Accounts = new AccountRepository(_context);
     }
-
-    public CategoryRepository Categories { get; }
-    public UserRepository Users { get; }
-    public BillPaymentRepository BillPayments { get; }
-    public BillRepository Bills { get; }
-    public BudgetRepository Budgets { get; }
-    public ExpenseRepository Expenses { get; }
-    public IncomeRepository Incomes { get; }
-    public TransactionRepository Transactions { get; set; }
-    public AccountRepository Accounts { get; set; }
 
     // Resolves a generic repo on-demand for any entity not needing a dedicated repo
     public IRepository<T> Repository<T>()

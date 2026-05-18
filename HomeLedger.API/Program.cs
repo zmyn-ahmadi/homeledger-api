@@ -227,3 +227,5 @@ app.UseExceptionHandler(errorApp =>
 );
 
 app.Run();
+
+public partial class Program { }

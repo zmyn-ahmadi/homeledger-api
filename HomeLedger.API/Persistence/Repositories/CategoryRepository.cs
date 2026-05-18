@@ -1,9 +1,12 @@
 using HomeLedger.API.Models;
+using HomeLedger.API.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeLedger.API.Persistence.Repositories;
 
-public class CategoryRepository(HomeLedgerDbContext context) : Repository<Category>(context)
+public class CategoryRepository(HomeLedgerDbContext context)
+    : Repository<Category>(context),
+        ICategoryRepository
 {
     public async Task<IEnumerable<Category>> GetByUserIdAsync(int userId) =>
         await _dbSet.Where(c => c.OwnerId == userId).ToListAsync();
