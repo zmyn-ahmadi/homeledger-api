@@ -4,13 +4,13 @@ namespace HomeLedger.API.DTOs.IncomeDTO;
 
 public class UpdateIncomeDTO
 {
-    public string? Source { get; set; }
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
-    public string? Description { get; set; }
+    public string Description { get; set; } = null!;
+    public string? Note { get; set; }
+
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency RecurringFrequency { get; set; }
 
-    public int OwnerId { get; set; }
     public int CategoryId { get; set; }
 }

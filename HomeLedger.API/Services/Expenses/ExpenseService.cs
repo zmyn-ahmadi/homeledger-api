@@ -76,8 +76,10 @@ public class ExpenseService(
 
     public async Task<bool> UpdateAsync(int id, UpdateExpenseDTO request)
     {
+        var userId = _userContext.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId, ["ExpenseId"] = id }
+            new Dictionary<string, object> { ["OwnerId"] = userId, ["ExpenseId"] = id }
         );
 
         var existingExpense = await _uow.Expenses.GetByIdAsync(id);

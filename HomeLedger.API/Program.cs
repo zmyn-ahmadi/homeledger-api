@@ -8,6 +8,7 @@ using HomeLedger.API.Services.Correlation;
 using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
+using HomeLedger.API.Utils.UserContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -154,6 +155,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 // ----------------------------------------------
 // Allow services to access HttpContext (used for CorrelationId, etc.

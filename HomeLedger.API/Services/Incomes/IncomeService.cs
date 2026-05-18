@@ -1,20 +1,29 @@
 using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Services.Incomes;
+using HomeLedger.API.Utils.UserContext;
 
-public class IncomeService(IUnitOfWork _uow, IncomeMapper mapper, ILogger<IncomeService> logger)
-    : IIncomeService
+public class IncomeService(
+    IUnitOfWork _uow,
+    IncomeMapper mapper,
+    ILogger<IncomeService> logger,
+    IUserContext userContext
+) : IIncomeService
 {
     private readonly IncomeMapper _mapper = mapper;
     private readonly ILogger<IncomeService> _logger = logger;
+    private readonly IUserContext _userContext = userContext;
 
     public async Task<IncomeDTO> AddAsync(CreateIncomeDTO request)
     {
+        var userId = _userContext.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["OwnerId"] = userId }
         );
 
         var newIncome = _mapper.ToEntity(request);
+        newIncome.OwnerId = userId;
         newIncome.CreatedAt = DateTime.UtcNow;
         newIncome.IsActive = true;
 
@@ -69,8 +78,9 @@ public class IncomeService(IUnitOfWork _uow, IncomeMapper mapper, ILogger<Income
 
     public async Task<bool> UpdateAsync(int id, UpdateIncomeDTO request)
     {
+        var userId = _userContext.UserId;
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId, ["IncomeId"] = id }
+            new Dictionary<string, object> { ["OwnerId"] = userId, ["IncomeId"] = id }
         );
 
         var existingIncome = await _uow.Incomes.GetByIdAsync(id);
