@@ -14,9 +14,13 @@ public class Expense : BaseAuditableEntity
     [Required]
     public DateTime Date { get; set; }
 
-    public string? Description { get; set; }
+    [Required]
+    public string Description { get; set; }
+    public string Note { get; set; }
+
     public int OwnerId { get; set; }
-    public virtual User Owner { get; set; } = null!;
     public int CategoryId { get; set; }
+
+    public virtual User Owner { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
 }

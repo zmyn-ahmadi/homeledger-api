@@ -341,8 +341,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
         {
             entity.HasKey(e => e.IncomeId);
 
-            entity.Property(e => e.Source).IsRequired().HasMaxLength(200);
-
             entity.Property(e => e.Amount).IsRequired().HasPrecision(18, 2);
 
             entity.Property(e => e.Date).IsRequired();

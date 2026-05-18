@@ -1,19 +1,30 @@
 using HomeLedger.API.DTOs.ExpensesDTO;
 using HomeLedger.API.Mappers;
+using HomeLedger.API.Utils.UserContext;
 
-public class ExpenseService(IUnitOfWork _uow, ExpenseMapper mapper, ILogger<ExpenseService> logger)
-    : IExpenseService
+public class ExpenseService(
+    IUnitOfWork _uow,
+    ExpenseMapper mapper,
+    IUserContext userContext,
+    ILogger<ExpenseService> logger
+) : IExpenseService
 {
     private readonly ExpenseMapper _mapper = mapper;
     private readonly ILogger<ExpenseService> _logger = logger;
+    private readonly IUserContext _userContext = userContext;
 
     public async Task<ExpenseDTO> AddAsync(CreateExpenseDTO request)
     {
+        // get the user's id from token
+        var userId = _userContext.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["OwnerId"] = userId }
         );
 
         var newExpense = _mapper.ToEntity(request);
+
+        newExpense.OwnerId = userId;
         newExpense.CreatedAt = DateTime.UtcNow;
         newExpense.IsActive = true;
 
