@@ -1,5 +1,6 @@
 using HomeLedger.API.DTOs.ExpensesDTO;
 using HomeLedger.API.Mappers;
+using HomeLedger.API.Models;
 using HomeLedger.API.Utils.UserContext;
 
 public class ExpenseService(
@@ -57,7 +58,7 @@ public class ExpenseService(
         return result;
     }
 
-    public async Task<IEnumerable<ExpenseDTO>> GetAllAsync()
+    public async Task<List<ExpenseDTO>> GetAllAsync()
     {
         var expenses = await _uow.Expenses.GetAllAsync();
         return [.. expenses.Select(_mapper.ToDto)];
@@ -99,5 +100,26 @@ public class ExpenseService(
         _logger.LogInformation("Updated Expense: {ExpenseId}", id);
 
         return true;
+    }
+
+    public async Task<List<ExpenseCategoryTotalDTO>> GetByCategoryAsync()
+    {
+        var userId = _userContext.UserId;
+
+        var expenses = await _uow.Expenses.GetTotalByCategoryAsync(userId);
+
+        if (expenses.Count == 0)
+        {
+            _logger.LogWarning("No expenses found for user {UserId}.", userId);
+            return [];
+        }
+
+        _logger.LogInformation(
+            "Retrieved {Count} category totals for user {UserId}.",
+            expenses.Count,
+            userId
+        );
+
+        return expenses;
     }
 }
