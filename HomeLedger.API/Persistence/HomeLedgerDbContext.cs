@@ -145,7 +145,15 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
+            entity.Property(e => e.CategoryId);
+
             entity.Property(e => e.OwnerId).IsRequired();
+
+            entity
+                .HasOne(b => b.Catgory)
+                .WithMany(c => c.Bills)
+                .HasForeignKey(b => b.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity
                 .HasOne(e => e.Owner)
@@ -171,6 +179,8 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 );
 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
+
+            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
 
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
 
