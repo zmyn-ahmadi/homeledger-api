@@ -223,10 +223,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Period).HasConversion<int>();
 
-            entity.Property(e => e.StartDate).IsRequired();
-
-            entity.Property(e => e.EndDate).IsRequired();
-
             entity.Property(e => e.AlertThreshold).HasDefaultValue(80);
 
             // Foreign key relationships
@@ -253,13 +249,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             // Ensure no overlapping budgets for same user/category
             entity
-                .HasIndex(e => new
-                {
-                    e.OwnerId,
-                    e.CategoryId,
-                    e.StartDate,
-                    e.EndDate,
-                })
+                .HasIndex(e => new { e.OwnerId, e.CategoryId })
                 .HasDatabaseName("IX_Budgets_DateRange");
         });
 
