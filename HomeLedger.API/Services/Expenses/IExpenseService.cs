@@ -1,4 +1,5 @@
 using HomeLedger.API.DTOs.ExpensesDTO;
+using HomeLedger.API.Models;
 
 public interface IExpenseService
 {
@@ -7,4 +8,5 @@ public interface IExpenseService
     Task<ExpenseDTO> AddAsync(CreateExpenseDTO request);
     Task<bool> UpdateAsync(int id, UpdateExpenseDTO request);
     Task<bool> DeleteAsync(int id);
+    Task<List<ExpenseCategoryTotalDTO>> GetByCategoryAsync();
 }

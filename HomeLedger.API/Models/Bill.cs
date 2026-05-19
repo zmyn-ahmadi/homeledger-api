@@ -32,6 +32,6 @@ public class Bill : BaseAuditableEntity
 
     public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
 
-    public int CategoryId { get; set; }
-    public virtual Category Catgory { get; set; } = null!;
+    public int? CategoryId { get; set; }
+    public virtual Category? Catgory { get; set; } = null!;
 }

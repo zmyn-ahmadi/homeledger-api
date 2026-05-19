@@ -145,8 +145,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            entity.Property(e => e.CategoryId);
-
             entity.Property(e => e.OwnerId).IsRequired();
 
             entity
