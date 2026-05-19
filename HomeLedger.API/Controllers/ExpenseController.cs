@@ -12,7 +12,7 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
     private readonly IExpenseService _service = expenseService;
 
     [HttpGet]
-    public async Task<ActionResult<List<<ExpenseDTO>>> GetExpenses()
+    public async Task<ActionResult<List<ExpenseDTO>>> GetExpenses()
     {
         var expenses = await _service.GetAllAsync();
         var expensesList = expenses as IList<ExpenseDTO> ?? [.. expenses];
@@ -64,7 +64,7 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
     }
 
     [HttpGet("category-totals")]
-    public async Task<ActionResult<List<ExpensExpenseCategoryTotalDTO>>> GetTotalByCategory()
+    public async Task<ActionResult<List<ExpenseCategoryTotalDTO>>> GetTotalByCategory()
     {
         var totalExpense = await _service.GetByCategoryAsync();
         return totalExpense.Count == 0 ? NoContent() : Ok(totalExpense);

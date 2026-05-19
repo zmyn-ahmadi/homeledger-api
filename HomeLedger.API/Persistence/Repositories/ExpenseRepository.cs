@@ -17,6 +17,7 @@ public class ExpenseRepository(HomeLedgerDbContext context)
                 Category = g.Key,
                 Total = g.Sum(e => e.Amount),
                 Count = g.Count(),
+                Icon = g.First().Category.Icon,
             })
             .ToListAsync();
 
