@@ -227,9 +227,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
         {
             entity.HasKey(e => e.BudgetId);
 
-            entity.Property(e => e.Amount).IsRequired().HasPrecision(18, 2);
+            entity.Property(e => e.LimitAmount).IsRequired().HasPrecision(18, 2);
 
             entity.Property(e => e.Period).HasConversion<int>();
+
+            entity.Property(e => e.StartDate);
+            entity.Property(e => e.EndDate);
 
             entity.Property(e => e.AlertThreshold).HasDefaultValue(80);
 
