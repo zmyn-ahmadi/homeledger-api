@@ -4,6 +4,7 @@ namespace HomeLedger.API.DTOs.BudgetDTO;
 
 public class CreateBudgetDTO
 {
+    public string Name { get; set; } = string.Empty;
     public decimal LimitAmount { get; set; }
     public Period Period { get; set; }
     public DateTime StartDate { get; set; }
