@@ -1,19 +1,28 @@
 using HomeLedger.API.DTOs.BudgetDTO;
 using HomeLedger.API.Mappers;
+using HomeLedger.API.Utils.UserContext;
 
-public class BudgetService(IUnitOfWork _uow, BudgetMapper mapper, ILogger<BudgetService> logger)
-    : IBudgetService
+public class BudgetService(
+    IUnitOfWork _uow,
+    BudgetMapper mapper,
+    ILogger<BudgetService> logger,
+    IUserContext userContext
+) : IBudgetService
 {
     private readonly BudgetMapper _mapper = mapper;
     private readonly ILogger<BudgetService> _logger = logger;
+    private readonly IUserContext _ctx = userContext;
 
     public async Task<BudgetDTO> AddAsync(CreateBudgetDTO request)
     {
+        var userId = _ctx.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["OwnerId"] = userId }
         );
 
         var newBudget = _mapper.ToEntity(request);
+        newBudget.OwnerId = userId;
         newBudget.CreatedAt = DateTime.UtcNow;
         newBudget.IsActive = true;
 
@@ -23,7 +32,7 @@ public class BudgetService(IUnitOfWork _uow, BudgetMapper mapper, ILogger<Budget
         _logger.LogInformation(
             "Created Budget {BudgetId} for User {OwnerId}",
             newBudget.BudgetId,
-            request.OwnerId
+            newBudget.OwnerId
         );
 
         return _mapper.ToDto(newBudget);
@@ -67,8 +76,10 @@ public class BudgetService(IUnitOfWork _uow, BudgetMapper mapper, ILogger<Budget
 
     public async Task<bool> UpdateAsync(int id, UpdateBudgetDTO request)
     {
+        var userId = _ctx.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId, ["BudgetId"] = id }
+            new Dictionary<string, object> { ["OwnerId"] = userId, ["BudgetId"] = id }
         );
         var existingBudget = await _uow.Budgets.GetByIdAsync(id);
 
