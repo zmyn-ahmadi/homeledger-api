@@ -6,6 +6,7 @@ public class BudgetDTO
 {
     public int BudgetId { get; set; }
 
+    public string Name { get; set; } = string.Empty;
     public decimal LimitAmount { get; set; }
     public Period Period { get; set; }
     public DateTime StartDate { get; set; }
