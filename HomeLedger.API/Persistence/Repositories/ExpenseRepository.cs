@@ -15,9 +15,11 @@ public class ExpenseRepository(HomeLedgerDbContext context)
             .Select(g => new ExpenseCategoryTotalDTO
             {
                 Category = g.Key,
+                CategoryId = g.First().CategoryId,
+                Icon = g.First().Category.Icon,
+
                 Total = g.Sum(e => e.Amount),
                 Count = g.Count(),
-                Icon = g.First().Category.Icon,
             })
             .ToListAsync();
 
