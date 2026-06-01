@@ -1,20 +1,29 @@
 using HomeLedger.API.DTOs.BillDTO;
 using HomeLedger.API.Mappers;
+using HomeLedger.API.Utils.UserContext;
 
-public class BillService(IUnitOfWork _uow, BillMapper mapper, ILogger<BillService> logger)
-    : IBillService
+public class BillService(
+    IUnitOfWork _uow,
+    BillMapper mapper,
+    ILogger<BillService> logger,
+    IUserContext userContext
+) : IBillService
 {
     private readonly BillMapper _mapper = mapper;
     private readonly ILogger<BillService> _logger = logger;
+    private readonly IUserContext _userCtx = userContext;
 
     public async Task<BillDTO> AddAsync(CreateBillDTO request)
     {
+        var userId = _userCtx.UserId;
+
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["OwnerId"] = userId }
         );
 
         // map the req to Bill obj
         var newBill = _mapper.ToEntity(request);
+        newBill.OwnerId = userId;
         newBill.CreatedAt = DateTime.UtcNow;
         newBill.IsActive = true;
 
