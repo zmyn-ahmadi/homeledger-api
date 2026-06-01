@@ -4,7 +4,7 @@ namespace HomeLedger.API.DTOs.BillDTO;
 
 public class CreateBillDTO
 {
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public decimal Amount { get; set; }
 
