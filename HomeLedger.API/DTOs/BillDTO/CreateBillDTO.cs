@@ -14,4 +14,5 @@ public class CreateBillDTO
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
+    public string Scope { get; set; } = string.Empty;
 }

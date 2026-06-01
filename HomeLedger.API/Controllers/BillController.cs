@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HomeLedger.API.DTOs.BillDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,7 @@ public class BillController(IBillService billService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<BillDTO>> PostBill([FromBody] CreateBillDTO createBill)
     {
+        Console.WriteLine($"Name: {createBill.Name}");
         if (createBill == null)
             return BadRequest("Request body is missing or invalid");
 
