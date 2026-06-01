@@ -23,9 +23,7 @@ public class Bill : BaseAuditableEntity
     public RecurringFrequency? RecurringFrequency { get; set; } = Models.RecurringFrequency.Monthly;
 
     public string? Notes { get; set; }
-
-    // many-to-many
-    public virtual ICollection<User>? SharedWith { get; set; }
+    public string Scope { get; set; } = string.Empty;
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;

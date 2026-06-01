@@ -159,22 +159,22 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // M:M
-            entity
-                .HasMany(e => e.SharedWith)
-                .WithMany(u => u.SharedBills)
-                .UsingEntity<Dictionary<string, object>>(
-                    "BillShares",
-                    j => j.HasOne<User>().WithMany().HasForeignKey("OwnerId"),
-                    j => j.HasOne<Bill>().WithMany().HasForeignKey("BillId"),
-                    j =>
-                    {
-                        j.HasKey("BillId", "OwnerId");
-                        j.ToTable("BillShares");
-                        j.HasIndex("OwnerId").HasDatabaseName("IX_BillShares_OwnerId");
-                        j.HasIndex("BillId").HasDatabaseName("IX_BillShares_BillId");
-                    }
-                );
+            // M:M - TRASH
+            // entity
+            //     .HasMany(e => e.SharedWith)
+            //     .WithMany(u => u.SharedBills)
+            //     .UsingEntity<Dictionary<string, object>>(
+            //         "BillShares",
+            //         j => j.HasOne<User>().WithMany().HasForeignKey("OwnerId"),
+            //         j => j.HasOne<Bill>().WithMany().HasForeignKey("BillId"),
+            //         j =>
+            //         {
+            //             j.HasKey("BillId", "OwnerId");
+            //             j.ToTable("BillShares");
+            //             j.HasIndex("OwnerId").HasDatabaseName("IX_BillShares_OwnerId");
+            //             j.HasIndex("BillId").HasDatabaseName("IX_BillShares_BillId");
+            //         }
+            //     );
 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
 

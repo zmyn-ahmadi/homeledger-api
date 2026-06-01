@@ -14,7 +14,4 @@ public class UpdateBillDTO
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
-
-    public virtual ICollection<User>? SharedWith { get; set; }
-    public int OwnerId { get; set; }
 }
