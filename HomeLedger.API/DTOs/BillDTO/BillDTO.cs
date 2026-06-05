@@ -12,7 +12,7 @@ public class BillDTO : BaseAuditableEntity
 
     public DateTime DueDate { get; set; }
 
-    public bool IsPaid { get; set; } = false;
+    public List<string> Status { get; set; } = ["Paid", "Overdue", "Upcoming"];
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
