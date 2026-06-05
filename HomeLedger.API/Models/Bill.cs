@@ -24,6 +24,7 @@ public class Bill : BaseAuditableEntity
 
     public string? Notes { get; set; }
     public string Scope { get; set; } = string.Empty;
+    public List<string> Status { get; set; } = ["Paid", "Overdue", "Upcoming"];
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
