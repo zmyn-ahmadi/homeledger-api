@@ -26,7 +26,7 @@ public class BillController(IBillService billService) : ControllerBase
         return billsList.Count == 0 ? NoContent() : Ok(billsList);
     }
 
-    [HttpGet("id:int")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<BillDTO?>> GetBill(int id)
     {
         var bill = await _service.GetByIdAsync(id);
@@ -53,7 +53,7 @@ public class BillController(IBillService billService) : ControllerBase
         return CreatedAtAction(nameof(GetBill), new { id = newBill.BillId }, newBill);
     }
 
-    [HttpPut("id:int")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult<BillDTO>> PutBill(
         [FromRoute] int id,
         [FromBody] UpdateBillDTO updateBill
@@ -69,7 +69,7 @@ public class BillController(IBillService billService) : ControllerBase
         return updatedBill ? NoContent() : NotFound();
     }
 
-    [HttpDelete("id:int")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult<bool>> DeleteBill([FromRoute] int id)
     {
         if (!ModelState.IsValid)
