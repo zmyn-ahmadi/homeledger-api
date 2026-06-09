@@ -137,8 +137,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.DueDate).IsRequired();
 
-            entity.Property(e => e.IsPaid).HasDefaultValue(false);
-
             entity.Property(e => e.IsRecurring).HasDefaultValue(false);
 
             entity.Property(e => e.RecurringFrequency).HasConversion<int>();
@@ -183,8 +181,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
 
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
-
-            entity.HasIndex(e => e.IsPaid).HasDatabaseName("IX_Bills_IsPaid");
         });
 
         // BillPayment Configuration
