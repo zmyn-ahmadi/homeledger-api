@@ -143,7 +143,8 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            entity.Property(e => e.Status);
+            // map the BillStatus enum to a string column
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
 
             entity.Property(e => e.OwnerId).IsRequired();
 
