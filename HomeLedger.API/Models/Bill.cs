@@ -2,6 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HomeLedger.API.Models;
 
+public enum BillStatus
+{
+    Upcoming,
+    Overdue,
+    Paid,
+}
+
 public class Bill : BaseAuditableEntity
 {
     [Key]
@@ -18,13 +25,12 @@ public class Bill : BaseAuditableEntity
     [Required]
     public DateTime DueDate { get; set; }
 
-    public bool IsPaid { get; set; } = false;
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; } = Models.RecurringFrequency.Monthly;
 
     public string? Notes { get; set; }
     public string Scope { get; set; } = string.Empty;
-    public List<string> Status { get; set; } = ["Paid", "Overdue", "Upcoming"];
+    public BillStatus Status { get; set; } = BillStatus.Upcoming;
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;

@@ -10,7 +10,7 @@ public class CreateBillDTO
 
     public DateTime DueDate { get; set; }
 
-    public List<string> Status { get; set; } = ["Paid", "Overdue", "Upcoming"];
+    public BillStatus Status { get; set; } = BillStatus.Upcoming;
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
