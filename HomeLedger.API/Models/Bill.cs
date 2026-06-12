@@ -2,13 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HomeLedger.API.Models;
 
-public enum BillStatus
-{
-    Upcoming,
-    Overdue,
-    Paid,
-}
-
 public class Bill : BaseAuditableEntity
 {
     [Key]
@@ -30,7 +23,7 @@ public class Bill : BaseAuditableEntity
 
     public string? Notes { get; set; }
     public string Scope { get; set; } = string.Empty;
-    public BillStatus Status { get; set; } = BillStatus.Upcoming;
+    public string Status { get; set; } = "NotPaid";
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
