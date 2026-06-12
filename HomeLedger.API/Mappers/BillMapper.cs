@@ -9,7 +9,7 @@ public partial class BillMapper
 {
     public partial BillDTO ToDto(Bill entity);
 
-    public partial BillDTO UpdateEntity(UpdateBillDTO dto, Bill entity);
+    public partial void UpdateEntity(UpdateBillDTO dto, Bill entity);
 
     public partial Bill ToEntity(CreateBillDTO dto);
 }
