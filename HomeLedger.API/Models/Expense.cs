@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeLedger.API.Models;
 
@@ -23,4 +24,9 @@ public class Expense : BaseAuditableEntity
 
     public virtual User Owner { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
+
+    public int FamilyId { get; set; }
+
+    [ForeignKey(nameof(FamilyId))]
+    public Family? Family { get; set; }
 }

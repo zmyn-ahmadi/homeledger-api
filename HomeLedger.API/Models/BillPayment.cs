@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeLedger.API.Models;
 
@@ -22,4 +23,9 @@ public class BillPayment : BaseAuditableEntity
     public int PaidById { get; set; }
     public virtual User PaidBy { get; set; } = null!;
     public string SourceHash { get; set; }
+
+    public int FamilyId { get; set; }
+
+    [ForeignKey(nameof(FamilyId))]
+    public Family? Family { get; set; }
 }

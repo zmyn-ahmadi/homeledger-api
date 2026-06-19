@@ -99,6 +99,50 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Family
+        modelBuilder.Entity<Family>(entity =>
+        {
+            // attribute
+            entity.HasKey(e => e.FamilyId);
+
+            // relationships
+            entity
+                .HasMany(e => e.Users)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Bills)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Payments)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Expenses)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Incomes)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Budgets)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         // UserProfile Configuration
         modelBuilder.Entity<UserProfile>(entity =>
         {

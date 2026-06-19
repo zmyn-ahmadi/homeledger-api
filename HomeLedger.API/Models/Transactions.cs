@@ -9,5 +9,5 @@ public class Transaction
     public string? Description { get; set; }
 
     public int AccountId { get; set; }
-    public virtual Account Account { get; set; }
+    public virtual Account? Account { get; set; }
 }
