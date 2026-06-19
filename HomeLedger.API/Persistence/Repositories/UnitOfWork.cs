@@ -1,3 +1,4 @@
+using HomeLedger.API.Models;
 using HomeLedger.API.Persistence;
 using HomeLedger.API.Persistence.Repositories;
 using HomeLedger.API.Persistence.Repositories.Interfaces;
@@ -7,6 +8,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly HomeLedgerDbContext _context;
     private readonly Dictionary<Type, object> _repositories = [];
 
+    // UoW public properties
     public ICategoryRepository Categories { get; }
     public IUserRepository Users { get; }
     public IBillPaymentRepository BillPayments { get; }
@@ -16,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
     public IIncomeRepository Incomes { get; }
     public TransactionRepository Transactions { get; set; }
     public AccountRepository Accounts { get; set; }
+    public IFamilyRepository Families { get; set; }
 
     public UnitOfWork(HomeLedgerDbContext context)
     {
@@ -29,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
         Incomes = new IncomeRepository(_context);
         Transactions = new TransactionRepository(_context);
         Accounts = new AccountRepository(_context);
+        Families = new FamilyRepository(_context);
     }
 
     // Resolves a generic repo on-demand for any entity not needing a dedicated repo
