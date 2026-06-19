@@ -42,5 +42,5 @@ public class Budget : BaseAuditableEntity
     public int FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
-    public Family? Family { get; set; }
+    public virtual Family? Family { get; set; }
 }

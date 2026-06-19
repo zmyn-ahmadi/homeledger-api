@@ -16,8 +16,8 @@ public class Income : BaseAuditableEntity
     public DateTime Date { get; set; }
 
     [Required]
-    public string Description { get; set; }
-    public string Note { get; set; }
+    public required string Description { get; set; }
+    public string Note { get; set; } = null!;
 
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency RecurringFrequency { get; set; }
@@ -31,5 +31,5 @@ public class Income : BaseAuditableEntity
     public int FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
-    public Family? Family { get; set; }
+    public virtual Family? Family { get; set; }
 }
