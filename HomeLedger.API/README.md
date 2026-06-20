@@ -15,3 +15,8 @@ c - test driven development
 
 - login:
   secure: false for dev
+
+---
+
+- GET: Family -> members is emtpy although its setup
+  setup invitation

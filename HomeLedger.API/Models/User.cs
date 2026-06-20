@@ -19,7 +19,7 @@ public class User : BaseAuditableEntity
 
     public string? BasiqUserId { get; set; }
 
-    public int FamilyId { get; set; }
+    public int? FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
     public virtual Family? Family { get; set; }

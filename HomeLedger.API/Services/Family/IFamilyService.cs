@@ -1,10 +1,13 @@
+using HomeLedger.API.DTOs.FamilyDTO;
 using HomeLedger.API.Models;
+
+namespace HomeLedger.API.Services.Family;
 
 public interface IFamilyService
 {
-    Task<IEnumerable<Family>> GetAllAsync();
-    Task<Family?> GetByIdAsync(int id);
-    Task<Family> AddAsync(Family request);
-    Task<Family> UpdateAsync(int id, Family request);
+    Task<IEnumerable<FamilyDTO>> GetAllAsync();
+    Task<FamilyDTO?> GetByIdAsync(int id);
+    Task<FamilyDTO> AddAsync(CreateFamilyDTO dto);
+    Task<FamilyDTO?> UpdateAsync(int id, UpdateFamilyDTO dto);
     Task<bool> DeleteAsync(int id);
 }

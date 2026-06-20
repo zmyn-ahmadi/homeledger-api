@@ -16,8 +16,8 @@ public class Expense : BaseAuditableEntity
     public DateTime Date { get; set; }
 
     [Required]
-    public string Description { get; set; }
-    public string Note { get; set; }
+    public required string Description { get; set; }
+    public string Note { get; set; } = null!;
 
     public int OwnerId { get; set; }
     public int CategoryId { get; set; }
@@ -25,7 +25,7 @@ public class Expense : BaseAuditableEntity
     public virtual User Owner { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
 
-    public int FamilyId { get; set; }
+    public int? FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
     public virtual Family? Family { get; set; }

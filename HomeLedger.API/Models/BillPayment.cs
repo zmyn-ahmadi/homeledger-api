@@ -24,7 +24,7 @@ public class BillPayment : BaseAuditableEntity
     public virtual User PaidBy { get; set; } = null!;
     public string SourceHash { get; set; } = null!;
 
-    public int FamilyId { get; set; }
+    public int? FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
     public virtual Family? Family { get; set; }

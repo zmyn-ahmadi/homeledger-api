@@ -28,7 +28,7 @@ public class Income : BaseAuditableEntity
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
 
-    public int FamilyId { get; set; }
+    public int? FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
     public virtual Family? Family { get; set; }

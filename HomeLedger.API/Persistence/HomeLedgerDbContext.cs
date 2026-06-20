@@ -97,7 +97,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithOne(e => e.PaidBy)
                 .HasForeignKey(e => e.PaidById)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Users)
@@ -216,7 +216,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
             // M:M - TRASH
             // entity
             //     .HasMany(e => e.SharedWith)
@@ -273,7 +272,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
             // Indexes
 
             entity.HasIndex(e => e.BillPaymentId).IsUnique().HasDatabaseName("uq_bill_payments");
@@ -317,7 +315,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany(e => e.Budgets)
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
@@ -392,13 +389,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany(c => c.Expenses)
                 .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Expenses)
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             // Indexes
 
@@ -439,7 +435,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany() // Add Incomes collection to User if needed
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Incomes)

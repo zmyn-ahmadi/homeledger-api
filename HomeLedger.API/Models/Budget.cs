@@ -39,7 +39,7 @@ public class Budget : BaseAuditableEntity
     public int CategoryId { get; set; }
     public virtual Category Category { get; set; } = null!;
 
-    public int FamilyId { get; set; }
+    public int? FamilyId { get; set; }
 
     [ForeignKey(nameof(FamilyId))]
     public virtual Family? Family { get; set; }

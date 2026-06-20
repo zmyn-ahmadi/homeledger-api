@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using HomeLedger.API.DTOs.FamilyDTO;
 using HomeLedger.API.Models;
+using HomeLedger.API.Services.Family;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HomeLedger.API.Controllers;
 
@@ -14,66 +16,52 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
     private readonly IFamilyService _service = familyService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Family>>> GetFamilies()
+    public async Task<ActionResult<IEnumerable<FamilyDTO>>> GetFamilies()
     {
         var fams = await _service.GetAllAsync();
-        var famsList = fams as IList<Family> ?? [.. fams];
+        var famsList = fams as IList<FamilyDTO> ?? [.. fams];
 
         return famsList.Count == 0 ? NoContent() : Ok(famsList);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Family?>> GetFamily(int id)
+    public async Task<ActionResult<FamilyDTO?>> GetFamily(int id)
     {
         var fam = await _service.GetByIdAsync(id);
-        if (fam == null)
-            return NotFound(new { Message = $"Family with ID {id} not found." });
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        return Ok(fam);
+        return fam != null
+            ? Ok(fam)
+            : NotFound(new { Message = $"Family with ID {id} not found." });
     }
 
     [HttpPost]
-    public async Task<ActionResult<Family>> PostFamily([FromBody] Family createFam)
+    public async Task<ActionResult<FamilyDTO>> PostFamily([FromBody] CreateFamilyDTO createFam)
     {
         if (createFam == null)
             return BadRequest("Request body is missing or invalid");
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
 
         var newFam = await _service.AddAsync(createFam);
         return CreatedAtAction(nameof(GetFamily), new { id = newFam.FamilyId }, newFam);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<Family>> PutFamily(
+    public async Task<ActionResult<FamilyDTO>> PutFamily(
         [FromRoute] int id,
-        [FromBody] Family updateFam
+        [FromBody] UpdateFamilyDTO updateFam
     )
     {
         if (updateFam == null)
             return BadRequest("Request body is missing or invalid");
 
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         var updatedFam = await _service.UpdateAsync(id, updateFam);
-        if (updatedFam == null)
-            return NotFound(new { Message = $"Family with ID {id} not found." });
-
-        return Ok(updatedFam);
+        return updatedFam == null
+            ? NotFound(new { Message = $"Family with ID {id} not found." })
+            : Ok(updatedFam);
     }
 
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteFamily(int id)
     {
         var result = await _service.DeleteAsync(id);
-        if (!result)
-            return NotFound(new { Message = $"Family with ID {id} not found." });
-
-        return NoContent();
+        return result ? NoContent() : NotFound(new { Message = $"Family with ID {id} not found" });
     }
 }
