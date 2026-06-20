@@ -5,11 +5,13 @@ using HomeLedger.API.Persistence;
 using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Correlation;
+using HomeLedger.API.Services.Family;
 using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
 using HomeLedger.API.Utils.UserContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -147,6 +149,7 @@ builder.Services.AddSingleton<CategoryMapper>();
 builder.Services.AddSingleton<ExpenseMapper>();
 builder.Services.AddSingleton<IncomeMapper>();
 builder.Services.AddSingleton<UserMapper>();
+builder.Services.AddSingleton<FamilyMapper>();
 
 // ----------------------------------------------
 // Services
@@ -159,6 +162,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<IFamilyService, FamilyService>();
 
 // ----------------------------------------------
 // Allow services to access HttpContext (used for CorrelationId, etc.
@@ -232,5 +236,3 @@ app.UseExceptionHandler(errorApp =>
 );
 
 app.Run();
-
-public partial class Program { }

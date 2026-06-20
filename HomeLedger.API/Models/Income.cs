@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeLedger.API.Models;
 
@@ -15,8 +16,8 @@ public class Income : BaseAuditableEntity
     public DateTime Date { get; set; }
 
     [Required]
-    public string Description { get; set; }
-    public string Note { get; set; }
+    public required string Description { get; set; }
+    public string Note { get; set; } = null!;
 
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency RecurringFrequency { get; set; }
@@ -26,4 +27,9 @@ public class Income : BaseAuditableEntity
     // M:1
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
+
+    public int? FamilyId { get; set; }
+
+    [ForeignKey(nameof(FamilyId))]
+    public virtual Family? Family { get; set; }
 }

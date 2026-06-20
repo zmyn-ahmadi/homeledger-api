@@ -50,7 +50,7 @@ public class TokenController(
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false, // for Dev
                 SameSite = SameSiteMode.Lax,
                 Expires = refreshToken.Expiry,
             }

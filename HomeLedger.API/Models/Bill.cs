@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeLedger.API.Models;
 
@@ -32,4 +33,9 @@ public class Bill : BaseAuditableEntity
 
     public int? CategoryId { get; set; }
     public virtual Category? Catgory { get; set; } = null!;
+
+    public int? FamilyId { get; set; }
+
+    [ForeignKey(nameof(FamilyId))]
+    public virtual Family? Family { get; set; }
 }

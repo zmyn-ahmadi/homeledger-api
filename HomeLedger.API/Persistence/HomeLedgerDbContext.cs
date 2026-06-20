@@ -97,6 +97,56 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithOne(e => e.PaidBy)
                 .HasForeignKey(e => e.PaidById)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Users)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Family
+        modelBuilder.Entity<Family>(entity =>
+        {
+            // attribute
+            entity.HasKey(e => e.FamilyId);
+
+            // relationships
+            entity
+                .HasMany(e => e.Users)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Bills)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Payments)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Expenses)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Incomes)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasMany(e => e.Budgets)
+                .WithOne(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // UserProfile Configuration
@@ -160,6 +210,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Bills)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // M:M - TRASH
             // entity
             //     .HasMany(e => e.SharedWith)
@@ -210,6 +266,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.PaidById)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Payments)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
 
             entity.HasIndex(e => e.BillPaymentId).IsUnique().HasDatabaseName("uq_bill_payments");
@@ -247,6 +309,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany(c => c.Budgets)
                 .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Budgets)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
@@ -322,6 +390,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Expenses)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
 
             // entity.HasIndex(e => e.ExpenseId).IsUnique().HasDatabaseName("uq_expense");
@@ -361,6 +435,12 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany() // Add Incomes collection to User if needed
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Incomes)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");
