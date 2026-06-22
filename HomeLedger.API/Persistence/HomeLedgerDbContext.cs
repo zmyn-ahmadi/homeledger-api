@@ -102,7 +102,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Users)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Family
@@ -116,37 +116,37 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasMany(e => e.Users)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity
                 .HasMany(e => e.Bills)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity
                 .HasMany(e => e.Payments)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity
                 .HasMany(e => e.Expenses)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity
                 .HasMany(e => e.Incomes)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity
                 .HasMany(e => e.Budgets)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // UserProfile Configuration
@@ -214,7 +214,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Bills)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // M:M - TRASH
             // entity
@@ -270,7 +270,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Payments)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
 
@@ -314,7 +314,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Budgets)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
@@ -394,7 +394,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Expenses)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
 
@@ -440,7 +440,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Incomes)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");

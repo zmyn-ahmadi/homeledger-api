@@ -18,5 +18,10 @@ c - test driven development
 
 ---
 
-- GET: Family -> members is emtpy although its setup
-  setup invitation
+- GET: Family -> done
+  - setup invitation
+  - /family/bill
+  - /family/payments
+  - /family/income
+  - /family/budget
+  - /family/expense

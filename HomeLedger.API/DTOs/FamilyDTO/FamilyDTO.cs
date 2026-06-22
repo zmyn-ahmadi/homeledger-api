@@ -7,6 +7,7 @@ public class FamilyDTO
 {
     public int FamilyId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public virtual ICollection<User> Members { get; set; } = [];
+    public ICollection<FamilyUserDTO> Users { get; set; } = [];
+    public ICollection<FamilyBillDTO> Bills { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 }

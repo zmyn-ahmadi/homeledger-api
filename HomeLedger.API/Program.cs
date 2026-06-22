@@ -37,6 +37,7 @@ builder
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc(
@@ -51,6 +52,29 @@ builder.Services.AddSwaggerGen(options =>
         }
     );
 
+    // OAuth2 OPTIOn
+    // options.AddSecurityDefinition(
+    //     "oauth2",
+    //     new OpenApiSecurityScheme
+    //     {
+    //         Type = SecuritySchemeType.OAuth2,
+    //         Flows = new OpenApiOAuthFlows
+    //         {
+    //             Password = new OpenApiOAuthFlow
+    //             {
+    //                 TokenUrl = new Uri("/api/token/login", UriKind.Relative),
+    //                 Scopes = new Dictionary<string, string> { { "api", "Access HomeLedger API" } },
+    //             },
+    //         },
+    //     }
+    // );
+    //
+    // options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    // {
+    //     [new OpenApiSecuritySchemeReference("oauth2", document)] = ["api"],
+    // });
+
+    // BEARER OPTION
     options.AddSecurityDefinition(
         "Bearer",
         new OpenApiSecurityScheme

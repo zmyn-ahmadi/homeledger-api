@@ -12,7 +12,7 @@ public class Repository<T>(HomeLedgerDbContext context) : IRepository<T>
 
     public virtual async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
-    public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+    public virtual async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
 
     public async Task<T> AddAsync(T entity)
     {
