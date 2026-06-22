@@ -42,4 +42,6 @@ public class User : BaseAuditableEntity
     public virtual ICollection<Budget> Budgets { get; set; } = [];
     public virtual ICollection<Bill> OwnedBills { get; set; } = [];
     public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
+    public ICollection<Link> CreatedInviteLinks { get; set; } = [];
+    public ICollection<LinkUsage> LinkUsages { get; set; } = [];
 }
