@@ -18,6 +18,27 @@ public class FamilyService(
 
     public async Task<FamilyDTO?> GetByIdAsync(int id)
     {
+        // get userId from jwt
+        var userId = _userCtx.UserId;
+
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = userId }
+        );
+
+        // get user
+        var user = await _uow.Users.GetByIdAsync(userId) ?? throw new Exception("User not found.");
+
+        var callerFamilyId = user.FamilyId;
+        if (callerFamilyId != id)
+        {
+            _logger.LogWarning(
+                "User {UserId} attempted t o access Family {FamilyId} -- denied.",
+                _userCtx.UserId,
+                id
+            );
+            return null;
+        }
+
         var fam = await _uow.Families.GetByIdAsync(id);
         if (fam is null)
         {
@@ -45,17 +66,20 @@ public class FamilyService(
 
         // get user
         var user = await _uow.Users.GetByIdAsync(userId) ?? throw new Exception("User not found.");
-        Console.WriteLine($"User: ${user}");
 
         // map
         var newFam = _mapper.ToEntity(request);
 
         // assign fields
-        newFam.Users.Add(user);
         newFam.CreatedAt = DateTime.UtcNow;
         newFam.IsActive = true;
 
         await _uow.Families.AddAsync(newFam);
+        await _uow.CommitAsync();
+
+        user.Family = newFam;
+        user.FamilyId = newFam.FamilyId;
+
         await _uow.CommitAsync();
 
         _logger.LogInformation(
@@ -63,6 +87,7 @@ public class FamilyService(
             newFam.FamilyId,
             userId
         );
+
         return _mapper.ToDto(newFam);
     }
 

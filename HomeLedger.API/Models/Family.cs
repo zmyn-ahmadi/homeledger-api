@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using HomeLedger.API.DTOs.UserDTO;
 
 namespace HomeLedger.API.Models;
 
@@ -8,7 +7,6 @@ public class Family : BaseAuditableEntity
     [Key]
     public int FamilyId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? InviteCode { get; set; } = string.Empty;
 
     // A family has multiple users
     public virtual ICollection<User> Users { get; set; } = [];
