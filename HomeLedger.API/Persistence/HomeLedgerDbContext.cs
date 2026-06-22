@@ -452,6 +452,44 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.HasIndex(e => new { e.OwnerId, e.Date }).HasDatabaseName("IX_Incomes_User_Date");
         });
 
+        modelBuilder.Entity<Link>(entity =>
+        {
+            entity.HasKey(e => e.LinkId);
+
+            entity.Property(e => e.Code).IsRequired().HasMaxLength(256);
+
+            entity.HasIndex(e => e.Code).IsUnique();
+
+            entity
+                .HasOne(l => l.Family)
+                .WithMany(f => f.InviteLinks)
+                .HasForeignKey(l => l.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasOne(l => l.Creator)
+                .WithMany(u => u.CreatedInviteLinks)
+                .HasForeignKey(l => l.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasMany(l => l.Usages)
+                .WithOne(u => u.Link)
+                .HasForeignKey(u => u.LinkId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<LinkUsage>(entity =>
+        {
+            entity.HasKey(e => e.LinkUsageId);
+
+            entity
+                .HasOne(e => e.User)
+                .WithMany(u => u.LinkUsages)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<Account>(entity =>
         {
             entity.HasKey(e => e.AccountId);
