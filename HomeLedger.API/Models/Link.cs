@@ -15,8 +15,8 @@ public class Link : BaseAuditableEntity
     public int? FamilyId { get; set; }
     public int CreatedBy { get; set; }
 
-    public Family Family { get; set; } = null!;
-    public User Creator { get; set; } = null!;
+    public virtual Family Family { get; set; } = null!;
+    public virtual User Creator { get; set; } = null!;
 
-    public ICollection<LinkUsage> Usages { get; set; } = [];
+    public virtual ICollection<LinkUsage> Usages { get; set; } = [];
 }
