@@ -3,6 +3,7 @@ using HomeLedger.API.DTOs.FamilyDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Models;
 using HomeLedger.API.Utils.UserContext;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HomeLedger.API.Services.Family;
 
@@ -135,11 +136,27 @@ public class FamilyService(
 
     public async Task<string> InviteAsync()
     {
+        var userId = _userCtx.UserId;
+        var user =
+            await _uow.Users.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException("User not found");
+        if (user.FamilyId is null)
+            throw new InvalidOperationException("User is not a member of any family");
+
         // 1. Generate code
         var code = GenerateCode();
 
         // 2. build a Link
-        var link = new Models.Link { Code = code };
+        var link = new Models.Link
+        {
+            Code = code,
+            FamilyId = user.FamilyId.Value,
+            CreatedBy = user.UserId,
+            IsRevoked = false,
+            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            MaxUses = 1,
+            UseCount = 0,
+        };
 
         // 3. add to database
         await _uow.Links.AddAsync(link);
@@ -147,6 +164,40 @@ public class FamilyService(
 
         // 3. return the generated link
         return $"{_config["App:BaseUrl"]}/invite?code={code}";
+    }
+
+    public async Task AcceptInvitationAsync(string code)
+    {
+        // 1. Grab the link for the database
+        var invitation =
+            await _uow.Links.GetLinkByCode(code)
+            ?? throw new InvalidOperationException("Invitation not found.");
+
+        if (invitation.ExpiresAt < DateTime.UtcNow)
+            throw new InvalidOperationException("Invitation has expired.");
+
+        if (invitation.IsRevoked)
+            throw new InvalidOperationException("Invitation has been revoked");
+
+        if (invitation.MaxUses.HasValue && invitation.UseCount >= invitation.MaxUses.Value)
+            throw new InvalidOperationException("Invitation has reached its use limit.");
+
+        var userId = _userCtx.UserId;
+        var user =
+            await _uow.Users.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException("User not found");
+
+        if (user.FamilyId is not null)
+        {
+            if (user.FamilyId == invitation.FamilyId)
+                return;
+            throw new InvalidOperationException("User is already a member of a family.");
+        }
+
+        user.FamilyId = invitation.FamilyId;
+        invitation.UseCount += 1;
+
+        await _uow.CommitAsync();
     }
 
     private string GenerateCode()

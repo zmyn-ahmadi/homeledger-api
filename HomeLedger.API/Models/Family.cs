@@ -8,7 +8,7 @@ public class Family : BaseAuditableEntity
     public int FamilyId { get; set; }
     public string Name { get; set; } = string.Empty;
 
-    public ICollection<Link> InviteLinks { get; set; } = [];
+    public virtual ICollection<Link> InviteLinks { get; set; } = [];
 
     // A family has multiple users
     public virtual ICollection<User> Users { get; set; } = [];
