@@ -2,21 +2,12 @@ using HomeLedger.API.DTOs.LinkDTO;
 using HomeLedger.API.Models;
 using Riok.Mapperly.Abstractions;
 
+namespace HomeLedger.API.Mappers;
+
 [Mapper]
 public partial class LinkMapper
 {
-    public LinkDTO ToDto(Link link) =>
-        new()
-        {
-            LinkId = link.LinkId,
-            Code = link.Code,
-            IsRevoked = link.IsRevoked,
-            ExpiresAt = link.ExpiresAt,
-            MaxUses = link.MaxUses,
-            UseCount = link.UseCount,
-            FamilyId = link.FamilyId,
-            CreatedBy = link.CreatedBy,
-        };
+    public partial LinkDTO ToDto(Link entity);
 
     public partial Link ToEntity(CreateLinkDTO dto);
 }

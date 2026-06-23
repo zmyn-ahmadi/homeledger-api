@@ -64,4 +64,18 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
         var result = await _service.DeleteAsync(id);
         return result ? NoContent() : NotFound(new { Message = $"Family with ID {id} not found" });
     }
+
+    [HttpPost("/family/invitations")]
+    public async Task<ActionResult<string>> CreateInvitation()
+    {
+        var link = await _service.InviteAsync();
+        return Ok(link);
+    }
+
+    [HttpPost("/family/invitations/{code}/accept")]
+    public async Task<IActionResult> AcceptInvitation(string code)
+    {
+        await _service.AcceptInvitationAsync(code);
+        return NoContent();
+    }
 }
