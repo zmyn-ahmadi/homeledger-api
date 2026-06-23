@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using HomeLedger.API.DTOs.FamilyDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Models;
@@ -9,9 +10,11 @@ public class FamilyService(
     IUnitOfWork _uow,
     FamilyMapper mapper,
     ILogger<FamilyService> logger,
+    IConfiguration config,
     IUserContext userContext
 ) : IFamilyService
 {
+    private readonly IConfiguration _config = config;
     private readonly ILogger<FamilyService> _logger = logger;
     private readonly FamilyMapper _mapper = mapper;
     private readonly IUserContext _userCtx = userContext;
@@ -128,5 +131,30 @@ public class FamilyService(
         }
 
         return result;
+    }
+
+    public async Task<string> InviteAsync()
+    {
+        // 1. Generate code
+        var code = GenerateCode();
+
+        // 2. build a Link
+        var link = new Models.Link { Code = code };
+
+        // 3. add to database
+        await _uow.Links.AddAsync(link);
+        await _uow.CommitAsync();
+
+        // 3. return the generated link
+        return $"{_config["App:BaseUrl"]}/invite?code={code}";
+    }
+
+    private string GenerateCode()
+    {
+        return Convert
+            .ToBase64String(RandomNumberGenerator.GetBytes(32))
+            .Replace("+", "-")
+            .Replace("/", "_")
+            .Replace("=", "");
     }
 }
