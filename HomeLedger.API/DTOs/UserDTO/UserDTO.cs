@@ -8,9 +8,11 @@ public class UserDTO
     public int UserId { get; set; }
 
     [EmailAddress]
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
-    public string FullName { get; set; }
+    public string FullName { get; set; } = string.Empty;
+
+    public int? FamilyId { get; set; }
 
     // 1:1 -> a user may have one profile
     public virtual UserProfileDTO? Profile { get; set; }
