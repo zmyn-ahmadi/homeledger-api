@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using HomeLedger.API.Models;
+using HomeLedger.API.DTOs.UserDTO;
 
 namespace HomeLedger.API.Utils.UserContext;
 
@@ -15,6 +15,27 @@ public class UserContext(IHttpContextAccessor accessor) : IUserContext
             if (!int.TryParse(claim, out var id))
                 throw new UnauthorizedAccessException("No authenticated user.");
             return id;
+        }
+    }
+
+    public UserDTO User
+    {
+        get
+        {
+            var claims =
+                (_accessor.HttpContext?.User?.Claims)
+                ?? throw new UnauthorizedAccessException("No authenticated user.");
+
+            var user = new UserDTO
+            {
+                UserId = int.Parse(
+                    claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "0"
+                ),
+                Email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                FullName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
+            };
+
+            return user;
         }
     }
 
