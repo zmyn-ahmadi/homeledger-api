@@ -11,6 +11,6 @@ public class LinkUsage
 
     public DateTime JoinedAt { get; set; }
 
-    public Link Link { get; set; } = null!;
-    public User User { get; set; } = null!;
+    public virtual Link Link { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }
