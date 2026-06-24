@@ -19,9 +19,14 @@ c - test driven development
 ---
 
 - GET: Family -> done
-  - setup invitation
+  - setup invitation - DONE
+  - setup sharing invitation link -> user clicks that should redirect user to login/signup page -> invitation page
   - /family/bill
   - /family/payments
   - /family/income
   - /family/budget
   - /family/expense
+
+---
+
+- Authorization: return bills if user is logged in (authenticated)
