@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -160,7 +161,7 @@ builder.Services.AddCors(options =>
         "AllowFrontend",
         policy =>
             policy
-                .WithOrigins("http://192.168.0.21:3000", "http://localhost:3000")
+                .WithOrigins("http://192.168.0.120:3000", "http://100.76.200.25:3000")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
     );
@@ -263,8 +264,8 @@ app.UseExceptionHandler(errorApp =>
 );
 
 app.MapGet("/health", () => new {
-    version = version;
-    status = "ok";
+    version = version,
+    status = "ok"
 });
 
 app.Run();
