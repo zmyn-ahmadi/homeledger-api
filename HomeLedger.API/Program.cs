@@ -38,6 +38,9 @@ builder
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 
+var version = typeof(Program).Assembly
+.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc(
@@ -45,7 +48,7 @@ builder.Services.AddSwaggerGen(options =>
         new OpenApiInfo
         {
             Title = "HomeLedger API",
-            Version = "v1",
+            Version = version,
             Description =
                 "HomeLedger API provides a complete backend for personal finance management.",
             Contact = new OpenApiContact { Email = "zmnahm17@gmail.com", Name = "zmyn ahmadi" },
@@ -258,5 +261,10 @@ app.UseExceptionHandler(errorApp =>
         await context.Response.WriteAsJsonAsync(new { error = message });
     })
 );
+
+app.MapGet("/health", () => new {
+    version = version;
+    status = "ok";
+});
 
 app.Run();
