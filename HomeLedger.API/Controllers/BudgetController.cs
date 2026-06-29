@@ -13,7 +13,8 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
 {
     private readonly IBudgetService _service = budgetService;
 
-    [HttpGet]
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("all")]
     public async Task<ActionResult<BudgetDTO>> GetBudgets()
     {
         var budgets = await _service.GetAllAsync();
@@ -22,6 +23,14 @@ public class BudgetController(IBudgetService budgetService) : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        return budgetsList.Count == 0 ? NoContent() : Ok(budgetsList);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<BudgetDTO>> GetBudgetsByUserId()
+    {
+        var budgets = await _service.GetAllByUserId();
+        var budgetsList = budgets as IList<BudgetDTO> ?? [.. budgets];
         return budgetsList.Count == 0 ? NoContent() : Ok(budgetsList);
     }
 

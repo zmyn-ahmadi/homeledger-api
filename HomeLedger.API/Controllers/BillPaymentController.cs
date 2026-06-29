@@ -16,10 +16,19 @@ public class BillPaymentController(IBillPaymentService billPaymentService) : Con
     private readonly IBillPaymentService _service = billPaymentService;
 
     // GET: api/billpayments
-    [HttpGet]
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<BillPaymentDTO>>> GetBillPayments()
     {
         var payments = await _service.GetAllAsync();
+        var paymentsList = payments as IList<BillPaymentDTO> ?? [.. payments];
+        return paymentsList.Count == 0 ? NoContent() : Ok(paymentsList);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<BillPaymentDTO>> GetPaymentsByUserId()
+    {
+        var payments = await _service.GetAllByUserIdAsync();
         var paymentsList = payments as IList<BillPaymentDTO> ?? [.. payments];
         return paymentsList.Count == 0 ? NoContent() : Ok(paymentsList);
     }

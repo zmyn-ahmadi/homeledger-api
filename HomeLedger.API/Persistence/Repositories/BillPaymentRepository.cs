@@ -10,4 +10,7 @@ public class BillPaymentRepository(HomeLedgerDbContext context)
 {
     public override async Task<IEnumerable<BillPayment>> GetAllAsync() =>
         await _dbSet.Include(bp => bp.Bill).Include(bp => bp.PaidBy).AsNoTracking().ToListAsync();
+
+    public async Task<List<BillPayment>> GetAllByUserId(int userId) =>
+        await _dbSet.Where(p => p.PaidById == userId).ToListAsync();
 }

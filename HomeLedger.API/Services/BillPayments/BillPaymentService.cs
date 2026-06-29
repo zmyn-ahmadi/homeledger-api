@@ -1,15 +1,18 @@
 using HomeLedger.API.DTOs.BillPaymentsDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Services.BillPayments;
+using HomeLedger.API.Utils.UserContext;
 
 public class BillPaymentService(
     IUnitOfWork _uow,
+    IUserContext userContext,
     BillPaymentMapper mapper,
     ILogger<BillPaymentService> logger
 ) : IBillPaymentService
 {
     private readonly BillPaymentMapper _mapper = mapper;
     private readonly ILogger<BillPaymentService> _logger = logger;
+    private readonly IUserContext _ctx = userContext;
 
     public async Task<BillPaymentDTO> AddAsync(CreateBillPaymentDTO request)
     {
@@ -54,6 +57,14 @@ public class BillPaymentService(
     public async Task<IEnumerable<BillPaymentDTO>> GetAllAsync()
     {
         var payments = await _uow.BillPayments.GetAllAsync();
+        return [.. payments.Select(_mapper.ToDto)];
+    }
+
+    public async Task<List<BillPaymentDTO>> GetAllByUserIdAsync()
+    {
+        var userId = _ctx.UserId;
+
+        var payments = await _uow.BillPayments.GetAllByUserId(userId);
         return [.. payments.Select(_mapper.ToDto)];
     }
 
