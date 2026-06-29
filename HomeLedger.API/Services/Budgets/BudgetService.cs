@@ -61,6 +61,14 @@ public class BudgetService(
         return [.. activeBudgets.Select(_mapper.ToDto)];
     }
 
+    public async Task<List<BudgetDTO>> GetAllByUserId()
+    {
+        var userId = _ctx.UserId;
+        var budgets = await _uow.Budgets.GetAllByUserIdAsync(userId);
+        var activeBudgets = budgets.Where(b => b.IsActive == true);
+        return [.. activeBudgets.Select(_mapper.ToDto)];
+    }
+
     public async Task<BudgetDTO?> GetByIdAsync(int id)
     {
         var budget = await _uow.Budgets.GetByIdAsync(id);
