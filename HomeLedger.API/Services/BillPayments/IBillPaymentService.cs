@@ -9,4 +9,5 @@ public interface IBillPaymentService
     Task<BillPaymentDTO> AddAsync(CreateBillPaymentDTO request);
     Task<bool> UpdateAsync(int id, UpdateBillPaymentDTO request);
     Task<bool> DeleteAsync(int id);
+    Task<List<BillPaymentDTO>> GetAllByUserIdAsync();
 }
