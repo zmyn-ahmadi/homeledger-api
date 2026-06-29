@@ -1,5 +1,9 @@
 using System.Security.Cryptography;
+using HomeLedger.API.DTOs.BillDTO;
+using HomeLedger.API.DTOs.BudgetDTO;
+using HomeLedger.API.DTOs.ExpensesDTO;
 using HomeLedger.API.DTOs.FamilyDTO;
+using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Models;
 using HomeLedger.API.Utils.UserContext;
@@ -10,6 +14,10 @@ namespace HomeLedger.API.Services.Family;
 public class FamilyService(
     IUnitOfWork _uow,
     FamilyMapper mapper,
+    BillMapper billMapper,
+    BudgetMapper budgetMapper,
+    ExpenseMapper expenseMapper,
+    IncomeMapper incomeMapper,
     ILogger<FamilyService> logger,
     IConfiguration config,
     IUserContext userContext
@@ -18,6 +26,10 @@ public class FamilyService(
     private readonly IConfiguration _config = config;
     private readonly ILogger<FamilyService> _logger = logger;
     private readonly FamilyMapper _mapper = mapper;
+    private readonly BillMapper _billMapper = billMapper;
+    private readonly BudgetMapper _budgetMapper = budgetMapper;
+    private readonly ExpenseMapper _expenseMapper = expenseMapper;
+    private readonly IncomeMapper _incomeMapper = incomeMapper;
     private readonly IUserContext _userCtx = userContext;
 
     public async Task<FamilyDTO?> GetByIdAsync(int id)
@@ -198,6 +210,143 @@ public class FamilyService(
         invitation.UseCount += 1;
 
         await _uow.CommitAsync();
+    }
+
+    // Bill
+    public async Task<List<BillDTO?>> GetFamilyBillsAsync()
+    {
+        // 1. Get userId
+        var userId = _userCtx.UserId;
+
+        // 2. Get User
+        var user = await _uow.Users.GetByIdAsync(userId);
+        if (user is null)
+        {
+            InvalidOperationException invalidOperationException = new("User not found.");
+            throw invalidOperationException;
+        }
+
+        // 3. Check if user has family
+        if (user.Family is null)
+        {
+            _logger.LogWarning(
+                "User: {userId} is not in family: {FamilyId}",
+                userId,
+                user.FamilyId
+            );
+            return [];
+        }
+
+        // 4. if so, get their bills
+        var bills = await _uow.Families.GetFamilyBillsAsync(user.FamilyId.Value);
+        return [.. bills.Select(_billMapper.ToDto)];
+    }
+
+    public async Task<BillDTO> AddFamilyBillAsync(CreateBillDTO req)
+    {
+        throw new NotImplementedException();
+    }
+
+    // Budget
+    public async Task<List<BudgetDTO>> GetFamilyBudgetsAsync()
+    {
+        // 1. Get userId
+        var userId = _userCtx.UserId;
+
+        // 2. Get User
+        var user = await _uow.Users.GetByIdAsync(userId);
+        if (user is null)
+        {
+            InvalidOperationException invalidOperationException = new("User not found.");
+            throw invalidOperationException;
+        }
+
+        // 3. Check if user has family
+        if (user.Family is null)
+        {
+            _logger.LogWarning(
+                "User: {userId} is not in family: {FamilyId}",
+                userId,
+                user.FamilyId
+            );
+            return [];
+        }
+
+        var budgets = await _uow.Families.GetFamilyBudgetsAsync(user.FamilyId.Value);
+        return [.. budgets.Select(_budgetMapper.ToDto)];
+    }
+
+    public async Task<BudgetDTO> AddFamilyBudgetAsync(CreateBudgetDTO req)
+    {
+        throw new NotImplementedException();
+    }
+
+    // Expense
+    public async Task<List<ExpenseDTO>> GetFamilyExpensesAsync()
+    {
+        // 1. Get userId
+        var userId = _userCtx.UserId;
+
+        // 2. Get User
+        var user = await _uow.Users.GetByIdAsync(userId);
+        if (user is null)
+        {
+            InvalidOperationException invalidOperationException = new("User not found.");
+            throw invalidOperationException;
+        }
+
+        // 3. Check if user has family
+        if (user.Family is null)
+        {
+            _logger.LogWarning(
+                "User: {userId} is not in family: {FamilyId}",
+                userId,
+                user.FamilyId
+            );
+            return [];
+        }
+
+        var expenses = await _uow.Families.GetFamilyExpensesAsync(user.FamilyId.Value);
+        return [.. expenses.Select(_expenseMapper.ToDto)];
+    }
+
+    public async Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req)
+    {
+        throw new NotImplementedException();
+    }
+
+    // Income
+    public async Task<List<IncomeDTO>> GetFamilyIncomesAsync()
+    {
+        // 1. Get userId
+        var userId = _userCtx.UserId;
+
+        // 2. Get User
+        var user = await _uow.Users.GetByIdAsync(userId);
+        if (user is null)
+        {
+            InvalidOperationException invalidOperationException = new("User not found.");
+            throw invalidOperationException;
+        }
+
+        // 3. Check if user has family
+        if (user.Family is null)
+        {
+            _logger.LogWarning(
+                "User: {userId} is not in family: {FamilyId}",
+                userId,
+                user.FamilyId
+            );
+            return [];
+        }
+
+        var incomes = await _uow.Families.GetFamilyIncomesAsync(user.FamilyId.Value);
+        return [.. incomes.Select(_incomeMapper.ToDto)];
+    }
+
+    public async Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req)
+    {
+        throw new NotImplementedException();
     }
 
     private string GenerateCode()

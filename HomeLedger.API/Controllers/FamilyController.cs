@@ -1,4 +1,8 @@
+using HomeLedger.API.DTOs.BillDTO;
+using HomeLedger.API.DTOs.BudgetDTO;
+using HomeLedger.API.DTOs.ExpensesDTO;
 using HomeLedger.API.DTOs.FamilyDTO;
+using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Models;
 using HomeLedger.API.Services.Family;
 using Microsoft.AspNetCore.Authorization;
@@ -77,5 +81,33 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
     {
         await _service.AcceptInvitationAsync(code);
         return NoContent();
+    }
+
+    [HttpGet("/family/bills")]
+    public async Task<ActionResult<BillDTO>> GetFamilyBills()
+    {
+        var bills = await _service.GetFamilyBillsAsync();
+        return bills.Count == 0 ? NoContent() : Ok(bills);
+    }
+
+    [HttpGet("/family/budgets")]
+    public async Task<ActionResult<BudgetDTO>> GetFamilyBudgets()
+    {
+        var budgets = await _service.GetFamilyBudgetsAsync();
+        return budgets.Count == 0 ? NoContent() : Ok(budgets);
+    }
+
+    [HttpGet("/family/expenses")]
+    public async Task<ActionResult<ExpenseDTO>> GetFamilyExpenses()
+    {
+        var expenses = await _service.GetFamilyExpensesAsync();
+        return expenses.Count == 0 ? NoContent() : Ok(expenses);
+    }
+
+    [HttpGet("/family/incomes")]
+    public async Task<ActionResult<IncomeDTO>> GetFamilyIncomes()
+    {
+        var incomes = await _service.GetFamilyIncomesAsync();
+        return incomes.Count == 0 ? NoContent() : Ok(incomes);
     }
 }
