@@ -86,7 +86,7 @@ public class TokenController(
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // home server is plain HTTP; set true once behind HTTPS
+                Secure = false,
                 SameSite = SameSiteMode.Lax,
                 Expires = newRefreshToken.Expiry,
             }
