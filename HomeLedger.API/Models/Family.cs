@@ -8,23 +8,12 @@ public class Family : BaseAuditableEntity
     public int FamilyId { get; set; }
     public string Name { get; set; } = string.Empty;
 
+    public virtual ICollection<FamilyMember> Members { get; set; } = [];
+
     public virtual ICollection<Link> InviteLinks { get; set; } = [];
-
-    // A family has multiple users
-    public virtual ICollection<User> Users { get; set; } = [];
-
-    // A family has bills
     public virtual ICollection<Bill> Bills { get; set; } = [];
-
-    // A family has billPayment
     public virtual ICollection<BillPayment> Payments { get; set; } = [];
-
-    // A family has expenses
     public virtual ICollection<Expense> Expenses { get; set; } = [];
-
-    // A family has incomes
     public virtual ICollection<Income> Incomes { get; set; } = [];
-
-    // A family has budgets
     public virtual ICollection<Budget> Budgets { get; set; } = [];
 }

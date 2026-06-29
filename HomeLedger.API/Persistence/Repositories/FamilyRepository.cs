@@ -10,10 +10,13 @@ public class FamilyRepository(HomeLedgerDbContext context)
         IFamilyRepository
 {
     public override async Task<IEnumerable<Family>> GetAllAsync() =>
-        await _dbSet.Include(u => u.Users).ToListAsync();
+        await _dbSet.Include(f => f.Members).ThenInclude(m => m.User).ToListAsync();
 
     public override async Task<Family?> GetByIdAsync(int id) =>
-        await _dbSet.Include(u => u.Users).FirstOrDefaultAsync(f => f.FamilyId == id);
+        await _dbSet
+            .Include(f => f.Members)
+                .ThenInclude(m => m.User)
+            .FirstOrDefaultAsync(f => f.FamilyId == id);
 
     public async Task<List<Bill>> GetFamilyBillsAsync(int familyId) =>
         await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Bills).ToListAsync();
