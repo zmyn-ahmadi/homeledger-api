@@ -16,7 +16,6 @@ public class UnitOfWork : IUnitOfWork
     public IBudgetRepository Budgets { get; }
     public IExpenseRepository Expenses { get; }
     public IIncomeRepository Incomes { get; }
-    public ITransactionRepository Transactions { get; set; }
     public AccountRepository Accounts { get; set; }
     public IFamilyRepository Families { get; set; }
     public ILinkRepository Links { get; set; }
@@ -31,7 +30,6 @@ public class UnitOfWork : IUnitOfWork
         Budgets = new BudgetRepository(_context);
         Expenses = new ExpenseRepository(_context);
         Incomes = new IncomeRepository(_context);
-        Transactions = new TransactionRepository(_context);
         Accounts = new AccountRepository(_context);
         Families = new FamilyRepository(_context);
         Links = new LinkRepository(_context);

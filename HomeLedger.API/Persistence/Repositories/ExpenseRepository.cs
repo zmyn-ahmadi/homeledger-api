@@ -25,4 +25,7 @@ public class ExpenseRepository(HomeLedgerDbContext context)
 
         return expensesByCategory;
     }
+
+    public async Task<List<Expense>> GetAllByUserId(int userId) =>
+        await _dbSet.Where(e => e.OwnerId == userId).ToListAsync();
 }
