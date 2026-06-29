@@ -14,4 +14,16 @@ public class FamilyRepository(HomeLedgerDbContext context)
 
     public override async Task<Family?> GetByIdAsync(int id) =>
         await _dbSet.Include(u => u.Users).FirstOrDefaultAsync(f => f.FamilyId == id);
+
+    public async Task<List<Bill>> GetFamilyBillsAsync(int familyId) =>
+        await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Bills).ToListAsync();
+
+    public async Task<List<Budget>> GetFamilyBudgetsAsync(int familyId) =>
+        await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Budgets).ToListAsync();
+
+    public async Task<List<Expense>> GetFamilyExpensesAsync(int familyId) =>
+        await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Expenses).ToListAsync();
+
+    public async Task<List<Income>> GetFamilyIncomesAsync(int familyId) =>
+        await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Incomes).ToListAsync();
 }
