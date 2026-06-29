@@ -11,10 +11,19 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
 {
     private readonly IExpenseService _service = expenseService;
 
-    [HttpGet]
-    public async Task<ActionResult<List<ExpenseDTO>>> GetExpenses()
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("all")]
+    public async Task<ActionResult<ExpenseDTO>> GetExpenses()
     {
         var expenses = await _service.GetAllAsync();
+        var expensesList = expenses as IList<ExpenseDTO> ?? [.. expenses];
+        return expensesList.Count == 0 ? NoContent() : Ok(expensesList);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<ExpenseDTO>> GetExpensesByUserId()
+    {
+        var expenses = await _service.GetAllByUserIdAsync();
         var expensesList = expenses as IList<ExpenseDTO> ?? [.. expenses];
         return expensesList.Count == 0 ? NoContent() : Ok(expensesList);
     }

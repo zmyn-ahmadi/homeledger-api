@@ -64,6 +64,13 @@ public class ExpenseService(
         return [.. expenses.Select(_mapper.ToDto)];
     }
 
+    public async Task<List<ExpenseDTO>> GetAllByUserIdAsync()
+    {
+        var userId = _userContext.UserId;
+        var expenses = await _uow.Expenses.GetAllByUserId(userId);
+        return [.. expenses.Select(_mapper.ToDto)];
+    }
+
     public async Task<ExpenseDTO?> GetByIdAsync(int id)
     {
         var expense = await _uow.Expenses.GetByIdAsync(id);
