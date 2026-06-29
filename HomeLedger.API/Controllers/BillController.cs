@@ -15,6 +15,15 @@ public class BillController(IBillService billService) : ControllerBase
     private readonly IBillService _service = billService;
 
     [HttpGet]
+    public async Task<ActionResult<BillDTO>> GetBillsByUserId()
+    {
+        var bills = await _service.GetAllBillByUserIdAsync();
+        var list = bills as IList<BillDTO> ?? [.. bills];
+        return list.Count == 0 ? NoContent() : Ok(list);
+    }
+
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("all")]
     public async Task<ActionResult<BillDTO>> GetBills()
     {
         var bills = await _service.GetAllAsync();
