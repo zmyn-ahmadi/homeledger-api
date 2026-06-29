@@ -19,13 +19,10 @@ public class User : BaseAuditableEntity
 
     public string? BasiqUserId { get; set; }
 
-    public int? FamilyId { get; set; }
-
-    [ForeignKey(nameof(FamilyId))]
-    public virtual Family? Family { get; set; }
-
     public DateTime LastLogin { get; set; }
     public bool IsSuperUser { get; set; }
+
+    public virtual ICollection<FamilyMember> FamilyMemberships { get; set; } = [];
 
     public int AccountId { get; set; }
     public virtual ICollection<Account> Accounts { get; set; } = [];

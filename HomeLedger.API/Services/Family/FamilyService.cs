@@ -32,33 +32,33 @@ public class FamilyService(
     private readonly IncomeMapper _incomeMapper = incomeMapper;
     private readonly IUserContext _userCtx = userContext;
 
+    public async Task<int?> GetCurrentUserFamilyIdAsync()
+    {
+        var userId = _userCtx.UserId;
+        var membership = await _uow.FamilyMembers.GetByUserIdAsync(userId);
+        return membership?.FamilyId;
+    }
+
     public async Task<FamilyDTO?> GetByIdAsync(int id)
     {
-        // get userId from jwt
-        var userId = _userCtx.UserId;
+        var familyId = await GetCurrentUserFamilyIdAsync();
 
-        using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = userId }
-        );
-
-        // get user
-        var user = await _uow.Users.GetByIdAsync(userId) ?? throw new Exception("User not found.");
-
-        var callerFamilyId = user.FamilyId;
-        if (callerFamilyId != id)
+        if (familyId != id)
         {
             _logger.LogWarning(
-                "User {UserId} attempted t o access Family {FamilyId} -- denied.",
+                "User {UserId} attempted to access Family {FamilyId} -- denied.",
                 _userCtx.UserId,
                 id
             );
+
             return null;
         }
 
         var fam = await _uow.Families.GetByIdAsync(id);
+
         if (fam is null)
         {
-            _logger.LogWarning("Family: {FamilyId} not found.", id);
+            _logger.LogWarning("Family: {FamilyId} not found", id);
             return null;
         }
 
@@ -93,9 +93,16 @@ public class FamilyService(
         await _uow.Families.AddAsync(newFam);
         await _uow.CommitAsync();
 
-        user.Family = newFam;
-        user.FamilyId = newFam.FamilyId;
+        var member = new FamilyMember
+        {
+            UserId = user.UserId,
+            FamilyId = newFam.FamilyId,
+            Role = "Owner",
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+        };
 
+        await _uow.FamilyMembers.AddAsync(member);
         await _uow.CommitAsync();
 
         _logger.LogInformation(
@@ -149,32 +156,28 @@ public class FamilyService(
     public async Task<string> InviteAsync()
     {
         var userId = _userCtx.UserId;
-        var user =
-            await _uow.Users.GetByIdAsync(userId)
-            ?? throw new InvalidOperationException("User not found");
-        if (user.FamilyId is null)
-            throw new InvalidOperationException("User is not a member of any family");
 
+        // 2. build a Link
+        var familyId =
+            await GetCurrentUserFamilyIdAsync()
+            ?? throw new InvalidOperationException("User is not a member of any family");
         // 1. Generate code
         var code = GenerateCode();
 
-        // 2. build a Link
         var link = new Models.Link
         {
             Code = code,
-            FamilyId = user.FamilyId.Value,
-            CreatedBy = user.UserId,
+            FamilyId = familyId,
+            CreatedBy = userId,
             IsRevoked = false,
             ExpiresAt = DateTime.UtcNow.AddDays(1),
             MaxUses = 1,
             UseCount = 0,
         };
 
-        // 3. add to database
         await _uow.Links.AddAsync(link);
         await _uow.CommitAsync();
 
-        // 3. return the generated link
         return $"{_config["App:BaseUrl"]}/invite?code={code}";
     }
 
@@ -195,18 +198,31 @@ public class FamilyService(
             throw new InvalidOperationException("Invitation has reached its use limit.");
 
         var userId = _userCtx.UserId;
-        var user =
-            await _uow.Users.GetByIdAsync(userId)
-            ?? throw new InvalidOperationException("User not found");
 
-        if (user.FamilyId is not null)
+        if (invitation.FamilyId is null)
+            throw new InvalidOperationException("Invitation is not linked to a family.");
+
+        var invitedFamilyId = invitation.FamilyId.Value;
+
+        var existingMembership = await _uow.FamilyMembers.GetByUserIdAndFamilyIdAsync(
+            userId,
+            invitedFamilyId
+        );
+
+        if (existingMembership is not null)
+            return;
+
+        var member = new FamilyMember
         {
-            if (user.FamilyId == invitation.FamilyId)
-                return;
-            throw new InvalidOperationException("User is already a member of a family.");
-        }
+            UserId = userId,
+            FamilyId = invitedFamilyId,
+            Role = "Member",
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+        };
 
-        user.FamilyId = invitation.FamilyId;
+        await _uow.FamilyMembers.AddAsync(member);
+
         invitation.UseCount += 1;
 
         await _uow.CommitAsync();
@@ -215,30 +231,16 @@ public class FamilyService(
     // Bill
     public async Task<List<BillDTO?>> GetFamilyBillsAsync()
     {
-        // 1. Get userId
-        var userId = _userCtx.UserId;
+        var familyId = await GetCurrentUserFamilyIdAsync();
 
-        // 2. Get User
-        var user = await _uow.Users.GetByIdAsync(userId);
-        if (user is null)
+        if (familyId is null)
         {
-            InvalidOperationException invalidOperationException = new("User not found.");
-            throw invalidOperationException;
-        }
-
-        // 3. Check if user has family
-        if (user.Family is null)
-        {
-            _logger.LogWarning(
-                "User: {userId} is not in family: {FamilyId}",
-                userId,
-                user.FamilyId
-            );
+            _logger.LogWarning("User {UserId} is not in any family.", _userCtx.UserId);
             return [];
         }
 
-        // 4. if so, get their bills
-        var bills = await _uow.Families.GetFamilyBillsAsync(user.FamilyId.Value);
+        var bills = await _uow.Families.GetFamilyBillsAsync(familyId.Value);
+
         return [.. bills.Select(_billMapper.ToDto)];
     }
 
@@ -250,29 +252,16 @@ public class FamilyService(
     // Budget
     public async Task<List<BudgetDTO>> GetFamilyBudgetsAsync()
     {
-        // 1. Get userId
-        var userId = _userCtx.UserId;
+        var familyId = await GetCurrentUserFamilyIdAsync();
 
-        // 2. Get User
-        var user = await _uow.Users.GetByIdAsync(userId);
-        if (user is null)
+        if (familyId is null)
         {
-            InvalidOperationException invalidOperationException = new("User not found.");
-            throw invalidOperationException;
-        }
-
-        // 3. Check if user has family
-        if (user.Family is null)
-        {
-            _logger.LogWarning(
-                "User: {userId} is not in family: {FamilyId}",
-                userId,
-                user.FamilyId
-            );
+            _logger.LogWarning("User {UserId} is not in any family.", _userCtx.UserId);
             return [];
         }
 
-        var budgets = await _uow.Families.GetFamilyBudgetsAsync(user.FamilyId.Value);
+        var budgets = await _uow.Families.GetFamilyBudgetsAsync(familyId.Value);
+
         return [.. budgets.Select(_budgetMapper.ToDto)];
     }
 
@@ -284,29 +273,16 @@ public class FamilyService(
     // Expense
     public async Task<List<ExpenseDTO>> GetFamilyExpensesAsync()
     {
-        // 1. Get userId
-        var userId = _userCtx.UserId;
+        var familyId = await GetCurrentUserFamilyIdAsync();
 
-        // 2. Get User
-        var user = await _uow.Users.GetByIdAsync(userId);
-        if (user is null)
+        if (familyId is null)
         {
-            InvalidOperationException invalidOperationException = new("User not found.");
-            throw invalidOperationException;
-        }
-
-        // 3. Check if user has family
-        if (user.Family is null)
-        {
-            _logger.LogWarning(
-                "User: {userId} is not in family: {FamilyId}",
-                userId,
-                user.FamilyId
-            );
+            _logger.LogWarning("User {UserId} is not in any family.", _userCtx.UserId);
             return [];
         }
 
-        var expenses = await _uow.Families.GetFamilyExpensesAsync(user.FamilyId.Value);
+        var expenses = await _uow.Families.GetFamilyExpensesAsync(familyId.Value);
+
         return [.. expenses.Select(_expenseMapper.ToDto)];
     }
 
@@ -318,29 +294,14 @@ public class FamilyService(
     // Income
     public async Task<List<IncomeDTO>> GetFamilyIncomesAsync()
     {
-        // 1. Get userId
-        var userId = _userCtx.UserId;
-
-        // 2. Get User
-        var user = await _uow.Users.GetByIdAsync(userId);
-        if (user is null)
+        var familyId = await GetCurrentUserFamilyIdAsync();
+        if (familyId is null)
         {
-            InvalidOperationException invalidOperationException = new("User not found.");
-            throw invalidOperationException;
-        }
-
-        // 3. Check if user has family
-        if (user.Family is null)
-        {
-            _logger.LogWarning(
-                "User: {userId} is not in family: {FamilyId}",
-                userId,
-                user.FamilyId
-            );
+            _logger.LogWarning("User {UserId} is not in any family", _userCtx.UserId);
             return [];
         }
 
-        var incomes = await _uow.Families.GetFamilyIncomesAsync(user.FamilyId.Value);
+        var incomes = await _uow.Families.GetFamilyIncomesAsync(familyId.Value);
         return [.. incomes.Select(_incomeMapper.ToDto)];
     }
 

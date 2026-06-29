@@ -99,10 +99,10 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity
-                .HasOne(e => e.Family)
-                .WithMany(e => e.Users)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasMany(e => e.FamilyMemberships)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Family
@@ -113,10 +113,10 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             // relationships
             entity
-                .HasMany(e => e.Users)
+                .HasMany(e => e.Members)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity
                 .HasMany(e => e.Bills)
@@ -147,6 +147,26 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<FamilyMember>(entity =>
+        {
+            entity.ToTable("FamilyMembers");
+            entity.HasKey(e => new { e.UserId, e.FamilyId });
+
+            entity
+                .HasOne(e => e.User)
+                .WithMany(e => e.FamilyMemberships)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Members)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
         });
 
         // UserProfile Configuration

@@ -21,11 +21,16 @@ c - test driven development
 - GET: Family -> done
   - setup invitation - DONE
   - setup sharing invitation link -> user clicks that should redirect user to login/signup page -> invitation page
-  - /family/bill
-  - /family/payments
-  - /family/income
-  - /family/budget
-  - /family/expense
+  - email service
+
+---
+
+Remove FamilyId from Users table
+
+Create another table:
+FamilyMembers:
+UserId
+FamilyId
 
 ---
 

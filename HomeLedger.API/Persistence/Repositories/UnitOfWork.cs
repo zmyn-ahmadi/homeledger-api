@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
     public AccountRepository Accounts { get; set; }
     public IFamilyRepository Families { get; set; }
     public ILinkRepository Links { get; set; }
+    public IFamilyMemberRepository FamilyMembers { get; set; }
 
     public UnitOfWork(HomeLedgerDbContext context)
     {
@@ -33,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
         Accounts = new AccountRepository(_context);
         Families = new FamilyRepository(_context);
         Links = new LinkRepository(_context);
+        FamilyMembers = new FamilyMemberRepository(_context);
     }
 
     // Resolves a generic repo on-demand for any entity not needing a dedicated repo

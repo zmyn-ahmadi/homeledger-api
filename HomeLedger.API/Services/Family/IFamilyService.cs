@@ -16,6 +16,7 @@ public interface IFamilyService
     Task<bool> DeleteAsync(int id);
     Task<string> InviteAsync();
     Task AcceptInvitationAsync(string code);
+    Task<int?> GetCurrentUserFamilyIdAsync();
 
     // Bill
     Task<List<BillDTO?>> GetFamilyBillsAsync();
