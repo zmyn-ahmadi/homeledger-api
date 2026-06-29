@@ -64,6 +64,17 @@ public class IncomeService(
         return [.. incomes.Select(_mapper.ToDto)];
     }
 
+    public async Task<IEnumerable<IncomeDTO>> GetAllByUserIdAsync()
+    {
+        var userId = _userContext.UserId;
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = userId, ["IncomeId"] = userId }
+        );
+
+        var incomes = await _uow.Incomes.GetAllByUserIdAsync(userId);
+        return [.. incomes.Select(_mapper.ToDto)];
+    }
+
     public async Task<IncomeDTO?> GetByIdAsync(int id)
     {
         var income = await _uow.Incomes.GetByIdAsync(id);

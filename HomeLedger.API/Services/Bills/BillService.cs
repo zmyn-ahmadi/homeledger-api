@@ -57,9 +57,22 @@ public class BillService(
         return result;
     }
 
+    // FOR ADMIN ONLY
     public async Task<IEnumerable<BillDTO>> GetAllAsync()
     {
         var bills = await _uow.Bills.GetAllAsync();
+        return [.. bills.Select(_mapper.ToDto)];
+    }
+
+    public async Task<IEnumerable<BillDTO>> GetAllBillByUserIdAsync()
+    {
+        var userId = _userCtx.UserId;
+
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["OwnerId"] = userId }
+        );
+
+        var bills = await _uow.Bills.GetAllByUserIdAsync(userId);
         return [.. bills.Select(_mapper.ToDto)];
     }
 

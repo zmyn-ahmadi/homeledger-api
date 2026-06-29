@@ -12,7 +12,8 @@ public class IncomeController(IIncomeService incomeService) : ControllerBase
 {
     private readonly IIncomeService _service = incomeService;
 
-    [HttpGet]
+    [Authorize(Policy = "SuperUserOnly")]
+    [HttpGet("all")]
     public async Task<ActionResult<IncomeDTO>> GetIncomes()
     {
         var incomes = await _service.GetAllAsync();
@@ -22,6 +23,14 @@ public class IncomeController(IIncomeService incomeService) : ControllerBase
             return BadRequest(ModelState);
 
         return incomesList.Count == 0 ? NoContent() : Ok(incomesList);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IncomeDTO>> GetIncomesByUserId()
+    {
+        var incomes = await _service.GetAllByUserIdAsync();
+        var list = incomes as IList<IncomeDTO> ?? [.. incomes];
+        return list.Count == 0 ? NoContent() : Ok(list);
     }
 
     [HttpGet("id:int")]

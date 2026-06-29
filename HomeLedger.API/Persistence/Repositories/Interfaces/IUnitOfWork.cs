@@ -16,6 +16,7 @@ public interface IUnitOfWork : IDisposable
     IIncomeRepository Incomes { get; }
     IFamilyRepository Families { get; }
     ILinkRepository Links { get; }
+    ITransactionRepository Transactions { get; }
 
     // Database transactions functions
     Task<int> CommitAsync();
