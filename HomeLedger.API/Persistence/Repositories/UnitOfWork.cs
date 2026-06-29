@@ -16,7 +16,7 @@ public class UnitOfWork : IUnitOfWork
     public IBudgetRepository Budgets { get; }
     public IExpenseRepository Expenses { get; }
     public IIncomeRepository Incomes { get; }
-    public TransactionRepository Transactions { get; set; }
+    public ITransactionRepository Transactions { get; set; }
     public AccountRepository Accounts { get; set; }
     public IFamilyRepository Families { get; set; }
     public ILinkRepository Links { get; set; }
