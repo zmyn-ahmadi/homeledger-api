@@ -69,43 +69,43 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
         return result ? NoContent() : NotFound(new { Message = $"Family with ID {id} not found" });
     }
 
-    [HttpPost("/family/invitations")]
+    [HttpPost("invitations")]
     public async Task<ActionResult<string>> CreateInvitation()
     {
         var link = await _service.InviteAsync();
         return Ok(link);
     }
 
-    [HttpPost("/family/invitations/{code}/accept")]
+    [HttpPost("invitations/{code}/accept")]
     public async Task<IActionResult> AcceptInvitation(string code)
     {
         await _service.AcceptInvitationAsync(code);
         return NoContent();
     }
 
-    [HttpGet("/family/bills")]
-    public async Task<ActionResult<BillDTO>> GetFamilyBills()
+    [HttpGet("bills")]
+    public async Task<ActionResult<IEnumerable<BillDTO>>> GetFamilyBills()
     {
         var bills = await _service.GetFamilyBillsAsync();
         return bills.Count == 0 ? NoContent() : Ok(bills);
     }
 
-    [HttpGet("/family/budgets")]
-    public async Task<ActionResult<BudgetDTO>> GetFamilyBudgets()
+    [HttpGet("budgets")]
+    public async Task<ActionResult<IEnumerable<BudgetDTO>>> GetFamilyBudgets()
     {
         var budgets = await _service.GetFamilyBudgetsAsync();
         return budgets.Count == 0 ? NoContent() : Ok(budgets);
     }
 
-    [HttpGet("/family/expenses")]
-    public async Task<ActionResult<ExpenseDTO>> GetFamilyExpenses()
+    [HttpGet("expenses")]
+    public async Task<ActionResult<IEnumerable<ExpenseDTO>>> GetFamilyExpenses()
     {
         var expenses = await _service.GetFamilyExpensesAsync();
         return expenses.Count == 0 ? NoContent() : Ok(expenses);
     }
 
-    [HttpGet("/family/incomes")]
-    public async Task<ActionResult<IncomeDTO>> GetFamilyIncomes()
+    [HttpGet("incomes")]
+    public async Task<ActionResult<IEnumerable<IncomeDTO>>> GetFamilyIncomes()
     {
         var incomes = await _service.GetFamilyIncomesAsync();
         return incomes.Count == 0 ? NoContent() : Ok(incomes);
