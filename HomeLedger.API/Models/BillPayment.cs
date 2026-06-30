@@ -20,11 +20,9 @@ public class BillPayment : BaseAuditableEntity
     public int BillId { get; set; }
     public virtual Bill Bill { get; set; } = null!;
 
-    public int PaidById { get; set; }
-    public int? OwnerId { get; set; }
+    public int? PaidById { get; set; }
     public int? FamilyId { get; set; }
 
-    public virtual User PaidBy { get; set; } = null!;
-    public virtual User? Owner { get; set; }
+    public virtual User? PaidBy { get; set; }
     public virtual Family? Family { get; set; }
 }
