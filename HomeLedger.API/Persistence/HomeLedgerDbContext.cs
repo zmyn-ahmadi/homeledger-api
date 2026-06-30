@@ -317,7 +317,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Budgets)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity
                 .HasOne(e => e.Category)
@@ -328,7 +328,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.ToTable(t =>
                 t.HasCheckConstraint(
                     "CK_Budget_OwnerOrFamily",
-                    "(\"OwnerId\" IS NOT NULL AND \"Family\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
+                    "(\"OwnerId\" IS NOT NULL AND \"FamilyId\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
                 )
             );
 
