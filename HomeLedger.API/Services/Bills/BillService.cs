@@ -24,6 +24,7 @@ public class BillService(
         // map the req to Bill obj
         var newBill = _mapper.ToEntity(request);
         newBill.OwnerId = userId;
+        newBill.Scope = "Personal";
         newBill.CreatedAt = DateTime.UtcNow;
         newBill.IsActive = true;
 

@@ -244,13 +244,58 @@ public class FamilyService(
         return [.. bills.Select(_billMapper.ToDto)];
     }
 
+    public async Task<BillDTO?> GetFamilyBillAsync(int id)
+    {
+        var familyId = await GetCurrentUserFamilyIdAsync();
+
+        if (familyId is null)
+        {
+            _logger.LogWarning("User {UserId} is not in any family.", _userCtx.UserId);
+            return null;
+        }
+        var bill = await _uow.Families.GetFamilyBillAsync(familyId.Value, id);
+        if (bill is null)
+        {
+            _logger.LogWarning(
+                "Bill {BillId} is not present in the family group {FamilyId}",
+                id,
+                familyId
+            );
+            return null;
+        }
+        return _billMapper.ToDto(bill);
+    }
+
     public async Task<BillDTO> AddFamilyBillAsync(CreateBillDTO req)
     {
-        throw new NotImplementedException();
+        var familyId =
+            await GetCurrentUserFamilyIdAsync()
+            ?? throw new InvalidOperationException("User is not found in any family");
+
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["FamilyId"] = familyId }
+        );
+
+        var newBill = _billMapper.ToEntity(req);
+        newBill.FamilyId = familyId;
+        newBill.Scope = "Family";
+        newBill.CreatedAt = DateTime.UtcNow;
+        newBill.IsActive = true;
+
+        await _uow.Bills.AddAsync(newBill);
+        await _uow.CommitAsync();
+
+        _logger.LogInformation(
+            "Created Bill {BillId} for family {FamilyId}",
+            newBill.BillId,
+            newBill.FamilyId
+        );
+
+        return _billMapper.ToDto(newBill);
     }
 
     // Budget
-    public async Task<List<BudgetDTO>> GetFamilyBudgetsAsync()
+    public async Task<List<BudgetDTO?>> GetFamilyBudgetsAsync()
     {
         var familyId = await GetCurrentUserFamilyIdAsync();
 
@@ -265,9 +310,54 @@ public class FamilyService(
         return [.. budgets.Select(_budgetMapper.ToDto)];
     }
 
+    public async Task<BudgetDTO?> GetFamilyBudgetAsync(int id)
+    {
+        var familyId = await GetCurrentUserFamilyIdAsync();
+
+        if (familyId is null)
+        {
+            _logger.LogWarning("User {UserId} is not in any family.", _userCtx.UserId);
+            return null;
+        }
+
+        var budget = await _uow.Families.GetFamilyBudgetAsync(familyId.Value, id);
+        if (budget is null)
+        {
+            _logger.LogWarning(
+                "Budget {BudgetId} is not present in the family group {FamilyId}",
+                id,
+                familyId
+            );
+            return null;
+        }
+        return _budgetMapper.ToDto(budget);
+    }
+
     public async Task<BudgetDTO> AddFamilyBudgetAsync(CreateBudgetDTO req)
     {
-        throw new NotImplementedException();
+        var familyId =
+            await GetCurrentUserFamilyIdAsync()
+            ?? throw new InvalidOperationException("User not found in any family");
+
+        using var scope = _logger.BeginScope(
+            new Dictionary<string, object> { ["FamilyId"] = familyId }
+        );
+
+        var newBudget = _budgetMapper.ToEntity(req);
+        newBudget.FamilyId = familyId;
+        newBudget.CreatedAt = DateTime.UtcNow;
+        newBudget.IsActive = true;
+
+        await _uow.Budgets.AddAsync(newBudget);
+        await _uow.CommitAsync();
+
+        _logger.LogInformation(
+            "Created budget {BudgetId} for family {FamilyId}",
+            newBudget.BudgetId,
+            newBudget.FamilyId
+        );
+
+        return _budgetMapper.ToDto(newBudget);
     }
 
     // Expense
@@ -288,6 +378,7 @@ public class FamilyService(
 
     public async Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req)
     {
+        // Get Member's Expense in the Family
         throw new NotImplementedException();
     }
 

@@ -90,11 +90,45 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
         return bills.Count == 0 ? NoContent() : Ok(bills);
     }
 
+    [HttpGet("bill/{id:int}")]
+    public async Task<ActionResult<BillDTO>> GetFamilyBill(int id)
+    {
+        var bill = await _service.GetFamilyBillAsync(id);
+        return bill != null ? Ok(bill) : NotFound(new { Message = $"Bill {id} not found." });
+    }
+
+    [HttpPost("bill")]
+    public async Task<ActionResult<BillDTO>> PostFamilyBill(CreateBillDTO req)
+    {
+        if (req is null)
+            return BadRequest("Request body is missing or invalid");
+
+        var newBill = await _service.AddFamilyBillAsync(req);
+        return CreatedAtAction(nameof(GetFamilyBill), new { id = newBill.BillId }, newBill);
+    }
+
     [HttpGet("budgets")]
     public async Task<ActionResult<IEnumerable<BudgetDTO>>> GetFamilyBudgets()
     {
         var budgets = await _service.GetFamilyBudgetsAsync();
         return budgets.Count == 0 ? NoContent() : Ok(budgets);
+    }
+
+    [HttpGet("budgets/{id:int}")]
+    public async Task<ActionResult<BudgetDTO>> GetFamilyBudget(int id)
+    {
+        var budget = await _service.GetFamilyBudgetAsync(id);
+        return budget != null ? Ok(budget) : NotFound(new { Message = $"Budget {id} not found." });
+    }
+
+    [HttpPost("budget")]
+    public async Task<ActionResult<BudgetDTO>> PostFamilyBudget(CreateBudgetDTO req)
+    {
+        if (req is null)
+            return BadRequest("Request body is missing or invalid");
+
+        var newBudget = await _service.AddFamilyBudgetAsync(req);
+        return CreatedAtAction(nameof(GetFamilyBudget), new { id = newBudget.BudgetId }, newBudget);
     }
 
     [HttpGet("expenses")]

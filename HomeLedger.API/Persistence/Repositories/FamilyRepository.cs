@@ -29,4 +29,22 @@ public class FamilyRepository(HomeLedgerDbContext context)
 
     public async Task<List<Income>> GetFamilyIncomesAsync(int familyId) =>
         await _dbSet.Where(f => f.FamilyId == familyId).SelectMany(f => f.Incomes).ToListAsync();
+
+    public async Task<Bill?> GetFamilyBillAsync(int familyId, int billId)
+    {
+        var family = await _dbSet
+            .Include(f => f.Bills)
+            .FirstOrDefaultAsync(f => f.FamilyId == familyId);
+
+        return family?.Bills.FirstOrDefault(b => b.BillId == billId);
+    }
+
+    public async Task<Budget?> GetFamilyBudgetAsync(int familyId, int budgetId)
+    {
+        var family = await _dbSet
+            .Include(f => f.Budgets)
+            .FirstOrDefaultAsync(f => f.FamilyId == familyId);
+
+        return family?.Budgets.FirstOrDefault(b => b.BudgetId == budgetId);
+    }
 }
