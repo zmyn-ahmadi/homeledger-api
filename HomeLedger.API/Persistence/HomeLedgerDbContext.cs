@@ -263,23 +263,10 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity
-                .HasOne(e => e.Owner)
-                .WithMany(u => u.BillPayments)
-                .HasForeignKey(e => e.OwnerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Payments)
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            entity.ToTable(t =>
-                t.HasCheckConstraint(
-                    "CK_Payment_OwnerOrFamily",
-                    "(\"OwnerId\" IS NOT NULL AND \"FamilyId\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
-                )
-            );
 
             // Indexes
             entity.HasIndex(e => e.BillPaymentId).IsUnique().HasDatabaseName("uq_bill_payments");
