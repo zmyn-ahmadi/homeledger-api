@@ -33,14 +33,11 @@ public class Budget : BaseAuditableEntity
     public int AlertThreshold { get; set; } = 80;
 
     // relationships
-    public int OwnerId { get; set; }
-    public virtual User Owner { get; set; } = null!;
-
-    public int CategoryId { get; set; }
-    public virtual Category Category { get; set; } = null!;
-
+    public int? OwnerId { get; set; }
     public int? FamilyId { get; set; }
+    public int? CategoryId { get; set; }
 
-    [ForeignKey(nameof(FamilyId))]
+    public virtual Category? Category { get; set; }
+    public virtual User? Owner { get; set; }
     public virtual Family? Family { get; set; }
 }

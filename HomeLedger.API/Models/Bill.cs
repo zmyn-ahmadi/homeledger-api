@@ -26,16 +26,13 @@ public class Bill : BaseAuditableEntity
     public string Scope { get; set; } = string.Empty;
     public string Status { get; set; } = "NotPaid";
 
-    public int OwnerId { get; set; }
-    public virtual User Owner { get; set; } = null!;
+    public int? OwnerId { get; set; }
+    public int? FamilyId { get; set; }
+    public int? CategoryId { get; set; }
+
+    public virtual Family? Family { get; set; }
+    public virtual User? Owner { get; set; }
+    public virtual Category? Catgory { get; set; }
 
     public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
-
-    public int? CategoryId { get; set; }
-    public virtual Category? Catgory { get; set; } = null!;
-
-    public int? FamilyId { get; set; }
-
-    [ForeignKey(nameof(FamilyId))]
-    public virtual Family? Family { get; set; }
 }

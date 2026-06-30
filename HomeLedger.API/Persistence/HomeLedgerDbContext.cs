@@ -213,10 +213,21 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            // map the BillStatus enum to a string column
-            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
 
-            entity.Property(e => e.OwnerId).IsRequired();
+            entity.Property(e => e.Scope).HasMaxLength(50);
+
+            entity
+                .HasOne(e => e.Family)
+                .WithMany(e => e.Bills)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity
+                .HasOne(e => e.Owner)
+                .WithMany(e => e.OwnedBills)
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity
                 .HasOne(b => b.Catgory)
@@ -224,39 +235,16 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(b => b.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity
-                .HasOne(e => e.Owner)
-                .WithMany(u => u.OwnedBills)
-                .HasForeignKey(e => e.OwnerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity
-                .HasOne(e => e.Family)
-                .WithMany(e => e.Bills)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // M:M - TRASH
-            // entity
-            //     .HasMany(e => e.SharedWith)
-            //     .WithMany(u => u.SharedBills)
-            //     .UsingEntity<Dictionary<string, object>>(
-            //         "BillShares",
-            //         j => j.HasOne<User>().WithMany().HasForeignKey("OwnerId"),
-            //         j => j.HasOne<Bill>().WithMany().HasForeignKey("BillId"),
-            //         j =>
-            //         {
-            //             j.HasKey("BillId", "OwnerId");
-            //             j.ToTable("BillShares");
-            //             j.HasIndex("OwnerId").HasDatabaseName("IX_BillShares_OwnerId");
-            //             j.HasIndex("BillId").HasDatabaseName("IX_BillShares_BillId");
-            //         }
-            //     );
+            entity.ToTable(t =>
+                t.HasCheckConstraint(
+                    "CK_Bill_OwnerOrFamily",
+                    "(\"OwnerId\" IS NOT NULL AND \"FamilyId\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
+                )
+            );
 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
-
+            entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Bills_FamilyId");
             entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
-
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
         });
 
@@ -313,6 +301,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.Property(e => e.Period).HasConversion<int>();
 
             entity.Property(e => e.StartDate);
+
             entity.Property(e => e.EndDate);
 
             entity.Property(e => e.AlertThreshold).HasDefaultValue(80);
@@ -325,20 +314,27 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity
-                .HasOne(e => e.Category)
-                .WithMany(c => c.Budgets)
-                .HasForeignKey(e => e.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Budgets)
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            entity
+                .HasOne(e => e.Category)
+                .WithMany(c => c.Budgets)
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.ToTable(t =>
+                t.HasCheckConstraint(
+                    "CK_Budget_OwnerOrFamily",
+                    "(\"OwnerId\" IS NOT NULL AND \"Family\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
+                )
+            );
+
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
-
+            entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Budgets_FamilyId");
             entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Budgets_CategoryId");
 
             entity
