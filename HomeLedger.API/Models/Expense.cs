@@ -24,9 +24,4 @@ public class Expense : BaseAuditableEntity
 
     public virtual User Owner { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
-
-    public int? FamilyId { get; set; }
-
-    [ForeignKey(nameof(FamilyId))]
-    public virtual Family? Family { get; set; }
 }

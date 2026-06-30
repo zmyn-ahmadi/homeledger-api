@@ -21,11 +21,10 @@ public class BillPayment : BaseAuditableEntity
     public virtual Bill Bill { get; set; } = null!;
 
     public int PaidById { get; set; }
-    public virtual User PaidBy { get; set; } = null!;
-    public string SourceHash { get; set; } = null!;
-
+    public int? OwnerId { get; set; }
     public int? FamilyId { get; set; }
 
-    [ForeignKey(nameof(FamilyId))]
+    public virtual User PaidBy { get; set; } = null!;
+    public virtual User? Owner { get; set; }
     public virtual Family? Family { get; set; }
 }
