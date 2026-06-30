@@ -1,3 +1,5 @@
+using HomeLedger.API.DTOs.ExpensesDTO;
+using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Models;
 using HomeLedger.API.Persistence;
 using HomeLedger.API.Persistence.Repositories.Interfaces;
