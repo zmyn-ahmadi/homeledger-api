@@ -1,3 +1,5 @@
+using HomeLedger.API.DTOs.ExpensesDTO;
+using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Models;
 
 namespace HomeLedger.API.Persistence.Repositories.Interfaces;
