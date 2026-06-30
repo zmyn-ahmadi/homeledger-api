@@ -131,18 +131,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity
-                .HasMany(e => e.Expenses)
-                .WithOne(e => e.Family)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            entity
-                .HasMany(e => e.Incomes)
-                .WithOne(e => e.Family)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            entity
                 .HasMany(e => e.Budgets)
                 .WithOne(e => e.Family)
                 .HasForeignKey(e => e.FamilyId)
@@ -275,13 +263,25 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity
+                .HasOne(e => e.Owner)
+                .WithMany(u => u.BillPayments)
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity
                 .HasOne(e => e.Family)
                 .WithMany(e => e.Payments)
                 .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.ToTable(t =>
+                t.HasCheckConstraint(
+                    "CK_Payment_OwnerOrFamily",
+                    "(\"OwnerId\" IS NOT NULL AND \"FamilyId\" IS NULL) OR (\"OwnerId\" IS NULL AND \"FamilyId\" IS NOT NULL)"
+                )
+            );
 
             // Indexes
-
             entity.HasIndex(e => e.BillPaymentId).IsUnique().HasDatabaseName("uq_bill_payments");
 
             entity.HasIndex(e => e.BillId).HasDatabaseName("IX_BillPayments_BillId");
@@ -406,12 +406,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity
-                .HasOne(e => e.Family)
-                .WithMany(e => e.Expenses)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
-
             // Indexes
 
             // entity.HasIndex(e => e.ExpenseId).IsUnique().HasDatabaseName("uq_expense");
@@ -451,12 +445,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany() // Add Incomes collection to User if needed
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            entity
-                .HasOne(e => e.Family)
-                .WithMany(e => e.Incomes)
-                .HasForeignKey(e => e.FamilyId)
-                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");
