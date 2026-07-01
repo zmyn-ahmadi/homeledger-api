@@ -32,5 +32,10 @@ public class Bill : BaseAuditableEntity
     public virtual Family? Family { get; set; }
     public virtual User? Owner { get; set; }
 
+    // Optional category. Nullable so a bill survives its category being
+    // deleted/truncated (FK is ON DELETE SET NULL) instead of dangling or cascading.
+    public int? CategoryId { get; set; }
+    public virtual Category? Category { get; set; }
+
     public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
 }

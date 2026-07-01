@@ -8,5 +8,5 @@ public class CreateExpenseDTO
     public DateTime Date { get; set; }
     public string Description { get; set; } = null!;
     public string? Note { get; set; }
-    public int CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 }

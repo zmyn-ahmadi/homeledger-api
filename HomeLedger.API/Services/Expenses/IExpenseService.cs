@@ -9,4 +9,5 @@ public interface IExpenseService
     Task<bool> UpdateAsync(int id, UpdateExpenseDTO request);
     Task<bool> DeleteAsync(int id);
     Task<List<ExpenseDTO>> GetAllByUserIdAsync();
+    Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync();
 }

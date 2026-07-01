@@ -15,4 +15,5 @@ public class CreateBillDTO
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
     public string Scope { get; set; } = string.Empty;
+    public int? CategoryId { get; set; }
 }

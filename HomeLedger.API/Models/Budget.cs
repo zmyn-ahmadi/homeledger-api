@@ -38,4 +38,9 @@ public class Budget : BaseAuditableEntity
 
     public virtual User? Owner { get; set; }
     public virtual Family? Family { get; set; }
+
+    // Optional category. Nullable so a budget survives its category being
+    // deleted/truncated (FK is ON DELETE SET NULL) instead of dangling or cascading.
+    public int? CategoryId { get; set; }
+    public virtual Category? Category { get; set; }
 }

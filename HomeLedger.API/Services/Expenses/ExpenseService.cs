@@ -71,6 +71,12 @@ public class ExpenseService(
         return [.. expenses.Select(_mapper.ToDto)];
     }
 
+    public async Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync()
+    {
+        var userId = _userContext.UserId;
+        return await _uow.Expenses.GetTotalByCategoryAsync(userId);
+    }
+
     public async Task<ExpenseDTO?> GetByIdAsync(int id)
     {
         var expense = await _uow.Expenses.GetByIdAsync(id);

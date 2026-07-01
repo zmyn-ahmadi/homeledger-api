@@ -217,6 +217,13 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Optional category — SetNull keeps the bill when its category is removed.
+            entity
+                .HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.ToTable(t =>
                 t.HasCheckConstraint(
                     "CK_Bill_OwnerOrFamily",
@@ -227,6 +234,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
             entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Bills_FamilyId");
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
+            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
         });
 
         // BillPayment Configuration
@@ -299,6 +307,13 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Optional category — SetNull keeps the budget when its category is removed.
+            entity
+                .HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.ToTable(t =>
                 t.HasCheckConstraint(
                     "CK_Budget_OwnerOrFamily",
@@ -309,6 +324,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
             entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Budgets_FamilyId");
+            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Budgets_CategoryId");
         });
 
         // Category Configuration (updated with Budgets relationship)
@@ -361,11 +377,19 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany(u => u.Expenses)
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Optional category — SetNull keeps the expense when its category is removed.
+            entity
+                .HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
             // Indexes
 
             // entity.HasIndex(e => e.ExpenseId).IsUnique().HasDatabaseName("uq_expense");
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Expenses_OwnerId");
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Expenses_Date");
+            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Expenses_CategoryId");
 
             entity
                 .HasIndex(e => new { e.OwnerId, e.Date })
@@ -398,8 +422,16 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Optional category — SetNull keeps the income when its category is removed.
+            entity
+                .HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Incomes_UserId");
+            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Incomes_CategoryId");
 
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Incomes_Date");
 

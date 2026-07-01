@@ -8,7 +8,10 @@ public class IncomeRepository(HomeLedgerDbContext context)
         IIncomeRepository
 {
     public async Task<List<Income>> GetAllByUserIdAsync(int userId) =>
-        await _dbSet.Where(i => i.OwnerId == userId).ToListAsync();
+        await _dbSet
+            .Include(i => i.Category)
+            .Where(i => i.OwnerId == userId)
+            .ToListAsync();
 
     public async Task<List<FamilyIncomeDTO>> GetMemberIncomesAsync(int familyId)
     {

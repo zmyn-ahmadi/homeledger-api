@@ -21,4 +21,9 @@ public class Expense : BaseAuditableEntity
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
+
+    // Optional category. Nullable so an expense survives its category being
+    // deleted/truncated (FK is ON DELETE SET NULL) instead of dangling or cascading.
+    public int? CategoryId { get; set; }
+    public virtual Category? Category { get; set; }
 }

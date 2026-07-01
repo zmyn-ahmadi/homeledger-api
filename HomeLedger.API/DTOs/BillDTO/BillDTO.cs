@@ -1,4 +1,5 @@
 using HomeLedger.API.Models;
+using CategoryDto = HomeLedger.API.DTOs.CategoryDTO.CategoryDTO;
 
 namespace HomeLedger.API.DTOs.BillDTO;
 
@@ -17,4 +18,9 @@ public class BillDTO : BaseAuditableEntity
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
     public string Scope { get; set; } = string.Empty;
+    public int? CategoryId { get; set; }
+
+    // Embedded category so the client renders name/icon/color without a
+    // separate fetch + fragile client-side join by id. Null when uncategorized.
+    public CategoryDto? Category { get; set; }
 }

@@ -27,4 +27,9 @@ public class Income : BaseAuditableEntity
     // M:1
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;
+
+    // Optional category. Nullable so an income survives its category being
+    // deleted/truncated (FK is ON DELETE SET NULL) instead of dangling or cascading.
+    public int? CategoryId { get; set; }
+    public virtual Category? Category { get; set; }
 }
