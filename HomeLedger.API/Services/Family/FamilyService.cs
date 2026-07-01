@@ -16,8 +16,6 @@ public class FamilyService(
     FamilyMapper mapper,
     BillMapper billMapper,
     BudgetMapper budgetMapper,
-    ExpenseMapper expenseMapper,
-    IncomeMapper incomeMapper,
     ILogger<FamilyService> logger,
     IConfiguration config,
     IUserContext userContext
@@ -28,8 +26,6 @@ public class FamilyService(
     private readonly FamilyMapper _mapper = mapper;
     private readonly BillMapper _billMapper = billMapper;
     private readonly BudgetMapper _budgetMapper = budgetMapper;
-    private readonly ExpenseMapper _expenseMapper = expenseMapper;
-    private readonly IncomeMapper _incomeMapper = incomeMapper;
     private readonly IUserContext _userCtx = userContext;
 
     public async Task<int?> GetCurrentUserFamilyIdAsync()
