@@ -367,19 +367,7 @@ public class FamilyService(
             return [];
         }
 
-        var expenses = await _uow.Families.GetFamilyExpensesAsync(familyId.Value);
-
-        return expenses
-            .Select(e => new FamilyExpenseDTO
-            {
-                ExpenseId = e.ExpenseId,
-                Amount = e.Amount,
-                Date = e.Date,
-                Description = e.Description,
-                UserId = e.OwnerId,
-                FullName = e.Owner?.FullName,
-            })
-            .ToList();
+        return await _uow.Expenses.GetMemberExpensesAsync(familyId.Value);
     }
 
     public async Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req)
@@ -398,19 +386,7 @@ public class FamilyService(
             return [];
         }
 
-        var incomes = await _uow.Families.GetFamilyIncomesAsync(familyId.Value);
-        return incomes
-            .Select(i => new FamilyIncomeDTO
-            {
-                IncomeId = i.IncomeId,
-                Amount = i.Amount,
-                Date = i.Date,
-                Description = i.Description,
-                Note = i.Note,
-                UserId = i.OwnerId,
-                FullName = i.Owner.FullName,
-            })
-            .ToList();
+        return await _uow.Incomes.GetMemberIncomesAsync(familyId.Value);
     }
 
     public async Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req)

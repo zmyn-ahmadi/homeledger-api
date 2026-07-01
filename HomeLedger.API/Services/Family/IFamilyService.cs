@@ -31,9 +31,6 @@ public interface IFamilyService
     // Expense
     Task<List<FamilyExpenseDTO>> GetFamilyExpensesAsync();
 
-    //Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req);
-
     // Income
     Task<List<FamilyIncomeDTO>> GetFamilyIncomesAsync();
-    //Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req);
 }
