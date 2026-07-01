@@ -217,12 +217,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity
-                .HasOne(b => b.Catgory)
-                .WithMany(c => c.Bills)
-                .HasForeignKey(b => b.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.ToTable(t =>
                 t.HasCheckConstraint(
                     "CK_Bill_OwnerOrFamily",
@@ -232,7 +226,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
 
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Bills_OwnerId");
             entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Bills_FamilyId");
-            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Bills_CategoryId");
             entity.HasIndex(e => e.DueDate).HasDatabaseName("IX_Bills_DueDate");
         });
 
@@ -306,12 +299,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .HasForeignKey(e => e.FamilyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity
-                .HasOne(e => e.Category)
-                .WithMany(c => c.Budgets)
-                .HasForeignKey(e => e.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.ToTable(t =>
                 t.HasCheckConstraint(
                     "CK_Budget_OwnerOrFamily",
@@ -322,16 +309,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             // Indexes
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Budgets_OwnerId");
             entity.HasIndex(e => e.FamilyId).HasDatabaseName("IX_Budgets_FamilyId");
-            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Budgets_CategoryId");
-
-            entity
-                .HasIndex(e => new { e.OwnerId, e.CategoryId })
-                .HasDatabaseName("IX_Budgets_User_Category");
-
-            // Ensure no overlapping budgets for same user/category
-            entity
-                .HasIndex(e => new { e.OwnerId, e.CategoryId })
-                .HasDatabaseName("IX_Budgets_DateRange");
         });
 
         // Category Configuration (updated with Budgets relationship)
@@ -344,8 +321,6 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
             entity.Property(e => e.Color).HasMaxLength(7).HasDefaultValue("#6366f1");
 
             entity.Property(e => e.Icon).HasMaxLength(50);
-
-            entity.Property(e => e.Type).HasConversion<int>();
 
             entity.Property(e => e.OwnerId).IsRequired();
 
@@ -386,20 +361,10 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 .WithMany(u => u.Expenses)
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            entity
-                .HasOne(e => e.Category)
-                .WithMany(c => c.Expenses)
-                .HasForeignKey(e => e.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Indexes
 
             // entity.HasIndex(e => e.ExpenseId).IsUnique().HasDatabaseName("uq_expense");
             entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Expenses_OwnerId");
-
-            entity.HasIndex(e => e.CategoryId).HasDatabaseName("IX_Expenses_CategoryId");
-
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Expenses_Date");
 
             entity

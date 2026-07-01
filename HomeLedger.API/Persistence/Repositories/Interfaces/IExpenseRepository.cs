@@ -5,7 +5,7 @@ using HomeLedger.API.Persistence.Repositories.Interfaces;
 
 public interface IExpenseRepository : IRepository<Expense>
 {
-    Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync(int userId);
+    //Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync(int userId);
     Task<List<Expense>> GetAllByUserId(int userId);
 
     // Member's expense

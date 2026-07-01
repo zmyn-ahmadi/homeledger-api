@@ -35,9 +35,7 @@ public class Budget : BaseAuditableEntity
     // relationships
     public int? OwnerId { get; set; }
     public int? FamilyId { get; set; }
-    public int? CategoryId { get; set; }
 
-    public virtual Category? Category { get; set; }
     public virtual User? Owner { get; set; }
     public virtual Family? Family { get; set; }
 }
