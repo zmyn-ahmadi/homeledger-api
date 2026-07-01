@@ -5,16 +5,10 @@ namespace HomeLedger.API.DTOs.CategoryDTO;
 
 public class CreateCategoryDTO
 {
-    [Required]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
-    [Required]
-    public string Color { get; set; }
+    public string? Color { get; set; } = string.Empty;
     public string? Icon { get; set; }
 
-    [Required]
     public int OwnerId { get; set; }
-
-    [Required]
-    public TransactionType Type { get; set; }
 }
