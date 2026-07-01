@@ -361,7 +361,7 @@ public class FamilyService(
     }
 
     // Expense
-    public async Task<List<ExpenseDTO>> GetFamilyExpensesAsync()
+    public async Task<List<FamilyExpenseDTO>> GetFamilyExpensesAsync()
     {
         var familyId = await GetCurrentUserFamilyIdAsync();
 
@@ -371,9 +371,7 @@ public class FamilyService(
             return [];
         }
 
-        var expenses = await _uow.Families.GetFamilyExpensesAsync(familyId.Value);
-
-        return [.. expenses.Select(_expenseMapper.ToDto)];
+        return await _uow.Expenses.GetMemberExpensesAsync(familyId.Value);
     }
 
     public async Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req)
@@ -383,7 +381,7 @@ public class FamilyService(
     }
 
     // Income
-    public async Task<List<IncomeDTO>> GetFamilyIncomesAsync()
+    public async Task<List<FamilyIncomeDTO>> GetFamilyIncomesAsync()
     {
         var familyId = await GetCurrentUserFamilyIdAsync();
         if (familyId is null)
@@ -392,8 +390,7 @@ public class FamilyService(
             return [];
         }
 
-        var incomes = await _uow.Families.GetFamilyIncomesAsync(familyId.Value);
-        return [.. incomes.Select(_incomeMapper.ToDto)];
+        return await _uow.Incomes.GetMemberIncomesAsync(familyId.Value);
     }
 
     public async Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req)
