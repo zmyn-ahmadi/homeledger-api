@@ -71,11 +71,4 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
             return NotFound($"Expense with ID:{id} not found.");
         return NoContent();
     }
-
-    [HttpGet("category-totals")]
-    public async Task<ActionResult<List<ExpenseCategoryTotalDTO>>> GetTotalByCategory()
-    {
-        var totalExpense = await _service.GetByCategoryAsync();
-        return totalExpense.Count == 0 ? NoContent() : Ok(totalExpense);
-    }
 }
