@@ -28,6 +28,13 @@ public class ExpenseController(IExpenseService expenseService) : ControllerBase
         return expensesList.Count == 0 ? NoContent() : Ok(expensesList);
     }
 
+    [HttpGet("category-totals")]
+    public async Task<ActionResult<IEnumerable<ExpenseCategoryTotalDTO>>> GetCategoryTotals()
+    {
+        var totals = await _service.GetTotalByCategoryAsync();
+        return totals.Count == 0 ? NoContent() : Ok(totals);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ExpenseDTO>> GetExpense(int id)
     {

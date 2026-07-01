@@ -11,5 +11,5 @@ public class CreateIncomeDTO
 
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency RecurringFrequency { get; set; }
-    public int CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 }

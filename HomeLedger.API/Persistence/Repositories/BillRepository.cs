@@ -9,5 +9,8 @@ public class BillRepository(HomeLedgerDbContext context)
         IBillRepository
 {
     public async Task<List<Bill>> GetAllByUserIdAsync(int userId) =>
-        await _dbSet.Where(b => b.OwnerId == userId).ToListAsync();
+        await _dbSet
+            .Include(b => b.Category)
+            .Where(b => b.OwnerId == userId)
+            .ToListAsync();
 }

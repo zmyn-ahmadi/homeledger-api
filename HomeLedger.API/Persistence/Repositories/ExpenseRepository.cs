@@ -8,27 +8,36 @@ public class ExpenseRepository(HomeLedgerDbContext context)
     : Repository<Expense>(context),
         IExpenseRepository
 {
-    // public async Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync(int userId)
-    // {
-    //     var expensesByCategory = await _context
-    //         .Expenses.Where(e => e.OwnerId == userId && e.IsActive)
-    //         .GroupBy(e => e.Category.Name)
-    //         .Select(g => new ExpenseCategoryTotalDTO
-    //         {
-    //             Category = g.Key,
-    //             CategoryId = g.First().CategoryId,
-    //             Icon = g.First().Category.Icon,
-    //
-    //             Total = g.Sum(e => e.Amount),
-    //             Count = g.Count(),
-    //         })
-    //         .ToListAsync();
-    //
-    //     return expensesByCategory;
-    // }
+    // Sum expenses per category for a user. Expenses whose category was removed
+    // (CategoryId == null) are grouped into a single "uncategorized" bucket.
+    public async Task<List<ExpenseCategoryTotalDTO>> GetTotalByCategoryAsync(int userId)
+    {
+        var expensesByCategory = await _dbSet
+            .Where(e => e.OwnerId == userId && e.IsActive)
+            .GroupBy(e => new
+            {
+                e.CategoryId,
+                Name = e.Category != null ? e.Category.Name : null,
+                Icon = e.Category != null ? e.Category.Icon : null,
+            })
+            .Select(g => new ExpenseCategoryTotalDTO
+            {
+                CategoryId = g.Key.CategoryId ?? 0,
+                Category = g.Key.Name ?? "uncategorized",
+                Icon = g.Key.Icon ?? "more-horizontal",
+                Total = g.Sum(e => e.Amount),
+                Count = g.Count(),
+            })
+            .ToListAsync();
+
+        return expensesByCategory;
+    }
 
     public async Task<List<Expense>> GetAllByUserId(int userId) =>
-        await _dbSet.Where(e => e.OwnerId == userId).ToListAsync();
+        await _dbSet
+            .Include(e => e.Category)
+            .Where(e => e.OwnerId == userId)
+            .ToListAsync();
 
     public async Task<List<FamilyExpenseDTO>> GetMemberExpensesAsync(int familyId)
     {

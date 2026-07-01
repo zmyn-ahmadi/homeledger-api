@@ -8,5 +8,8 @@ public class BudgetRepository(HomeLedgerDbContext context)
         IBudgetRepository
 {
     public async Task<List<Budget>> GetAllByUserIdAsync(int userId) =>
-        await _dbSet.Where(b => b.OwnerId == userId).ToListAsync();
+        await _dbSet
+            .Include(b => b.Category)
+            .Where(b => b.OwnerId == userId)
+            .ToListAsync();
 }

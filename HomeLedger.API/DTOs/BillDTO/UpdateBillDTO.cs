@@ -14,4 +14,5 @@ public class UpdateBillDTO
     public bool IsRecurring { get; set; } = false;
     public RecurringFrequency? RecurringFrequency { get; set; }
     public string? Notes { get; set; }
+    public int? CategoryId { get; set; }
 }
