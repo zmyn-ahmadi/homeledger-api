@@ -1,16 +1,19 @@
 using HomeLedger.API.DTOs.CategoryDTO;
 using HomeLedger.API.Mappers;
+using HomeLedger.API.Utils.UserContext;
 
 namespace HomeLedger.API.Services.Categories;
 
 public class CategoryService(
     IUnitOfWork _uow,
+    IUserContext userContext,
     CategoryMapper mapper,
     ILogger<CategoryService> logger
 ) : ICategoryService
 {
     private readonly CategoryMapper _mapper = mapper;
     private readonly ILogger<CategoryService> _logger = logger;
+    private readonly IUserContext _userCtx = userContext;
 
     public async Task<IEnumerable<CategoryDTO>> GetAllAsync()
     {
@@ -32,17 +35,18 @@ public class CategoryService(
     public async Task<CategoryDTO> AddAsync(CreateCategoryDTO request)
     {
         using var scope = _logger.BeginScope(
-            new Dictionary<string, object> { ["OwnerId"] = request.OwnerId }
+            new Dictionary<string, object> { ["OwnerId"] = _userCtx.UserId }
         );
 
         var normalizedName = request.Name.Trim().ToLower();
-        if (await _uow.Categories.NameExistsAsync(normalizedName, request.OwnerId))
+        if (await _uow.Categories.NameExistsAsync(normalizedName, _userCtx.UserId))
         {
             _logger.LogWarning("Category {Name} already exists", request.Name);
             throw new InvalidOperationException($"Category '{request.Name}' already exists.");
         }
 
         var newCat = _mapper.ToEntity(request);
+        newCat.OwnerId = _userCtx.UserId;
         newCat.CreatedAt = DateTime.UtcNow;
         newCat.IsActive = true;
 

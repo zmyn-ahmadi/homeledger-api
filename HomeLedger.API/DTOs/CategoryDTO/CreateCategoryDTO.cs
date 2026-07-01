@@ -9,6 +9,4 @@ public class CreateCategoryDTO
 
     public string? Color { get; set; } = string.Empty;
     public string? Icon { get; set; }
-
-    public int OwnerId { get; set; }
 }
