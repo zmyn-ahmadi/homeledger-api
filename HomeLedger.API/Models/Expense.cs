@@ -20,8 +20,5 @@ public class Expense : BaseAuditableEntity
     public string Note { get; set; } = null!;
 
     public int OwnerId { get; set; }
-    public int CategoryId { get; set; }
-
     public virtual User Owner { get; set; } = null!;
-    public virtual Category Category { get; set; } = null!;
 }

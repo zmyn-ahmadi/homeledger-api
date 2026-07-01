@@ -28,11 +28,9 @@ public class Bill : BaseAuditableEntity
 
     public int? OwnerId { get; set; }
     public int? FamilyId { get; set; }
-    public int? CategoryId { get; set; }
 
     public virtual Family? Family { get; set; }
     public virtual User? Owner { get; set; }
-    public virtual Category? Catgory { get; set; }
 
     public virtual ICollection<BillPayment> BillPayments { get; set; } = [];
 }
