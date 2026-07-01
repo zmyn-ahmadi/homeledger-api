@@ -17,6 +17,11 @@ public class Income : BaseAuditableEntity
 
     [Required]
     public required string Description { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public required string Source { get; set; }
+
     public string Note { get; set; } = null!;
 
     public bool IsRecurring { get; set; } = false;
