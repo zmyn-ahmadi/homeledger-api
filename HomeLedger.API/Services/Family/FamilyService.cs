@@ -16,8 +16,6 @@ public class FamilyService(
     FamilyMapper mapper,
     BillMapper billMapper,
     BudgetMapper budgetMapper,
-    ExpenseMapper expenseMapper,
-    IncomeMapper incomeMapper,
     ILogger<FamilyService> logger,
     IConfiguration config,
     IUserContext userContext
@@ -28,8 +26,6 @@ public class FamilyService(
     private readonly FamilyMapper _mapper = mapper;
     private readonly BillMapper _billMapper = billMapper;
     private readonly BudgetMapper _budgetMapper = budgetMapper;
-    private readonly ExpenseMapper _expenseMapper = expenseMapper;
-    private readonly IncomeMapper _incomeMapper = incomeMapper;
     private readonly IUserContext _userCtx = userContext;
 
     public async Task<int?> GetCurrentUserFamilyIdAsync()
@@ -361,7 +357,7 @@ public class FamilyService(
     }
 
     // Expense
-    public async Task<List<ExpenseDTO>> GetFamilyExpensesAsync()
+    public async Task<List<FamilyExpenseDTO>> GetFamilyExpensesAsync()
     {
         var familyId = await GetCurrentUserFamilyIdAsync();
 
@@ -373,7 +369,17 @@ public class FamilyService(
 
         var expenses = await _uow.Families.GetFamilyExpensesAsync(familyId.Value);
 
-        return [.. expenses.Select(_expenseMapper.ToDto)];
+        return expenses
+            .Select(e => new FamilyExpenseDTO
+            {
+                ExpenseId = e.ExpenseId,
+                Amount = e.Amount,
+                Date = e.Date,
+                Description = e.Description,
+                UserId = e.OwnerId,
+                FullName = e.Owner?.FullName,
+            })
+            .ToList();
     }
 
     public async Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req)
@@ -383,7 +389,7 @@ public class FamilyService(
     }
 
     // Income
-    public async Task<List<IncomeDTO>> GetFamilyIncomesAsync()
+    public async Task<List<FamilyIncomeDTO>> GetFamilyIncomesAsync()
     {
         var familyId = await GetCurrentUserFamilyIdAsync();
         if (familyId is null)
@@ -393,7 +399,18 @@ public class FamilyService(
         }
 
         var incomes = await _uow.Families.GetFamilyIncomesAsync(familyId.Value);
-        return [.. incomes.Select(_incomeMapper.ToDto)];
+        return incomes
+            .Select(i => new FamilyIncomeDTO
+            {
+                IncomeId = i.IncomeId,
+                Amount = i.Amount,
+                Date = i.Date,
+                Description = i.Description,
+                Note = i.Note,
+                UserId = i.OwnerId,
+                FullName = i.Owner.FullName,
+            })
+            .ToList();
     }
 
     public async Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req)

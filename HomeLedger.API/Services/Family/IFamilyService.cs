@@ -29,11 +29,11 @@ public interface IFamilyService
     Task<BudgetDTO> AddFamilyBudgetAsync(CreateBudgetDTO req);
 
     // Expense
-    Task<List<ExpenseDTO>> GetFamilyExpensesAsync();
+    Task<List<FamilyExpenseDTO>> GetFamilyExpensesAsync();
 
     //Task<ExpenseDTO> AddFamilyExpenseAsync(CreateExpenseDTO req);
 
     // Income
-    Task<List<IncomeDTO>> GetFamilyIncomesAsync();
+    Task<List<FamilyIncomeDTO>> GetFamilyIncomesAsync();
     //Task<IncomeDTO> AddFamilyIncomeAsync(CreateIncomeDTO req);
 }
