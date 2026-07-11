@@ -6,6 +6,7 @@ using HomeLedger.API.DTOs.FamilyDTO;
 using HomeLedger.API.DTOs.IncomeDTO;
 using HomeLedger.API.Mappers;
 using HomeLedger.API.Models;
+using HomeLedger.API.Services.Email;
 using HomeLedger.API.Utils.UserContext;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -18,7 +19,8 @@ public class FamilyService(
     BudgetMapper budgetMapper,
     ILogger<FamilyService> logger,
     IConfiguration config,
-    IUserContext userContext
+    IUserContext userContext,
+    IEmailService emailService
 ) : IFamilyService
 {
     private readonly IConfiguration _config = config;
@@ -27,6 +29,7 @@ public class FamilyService(
     private readonly BillMapper _billMapper = billMapper;
     private readonly BudgetMapper _budgetMapper = budgetMapper;
     private readonly IUserContext _userCtx = userContext;
+    private readonly IEmailService _email = emailService;
 
     public async Task<int?> GetCurrentUserFamilyIdAsync()
     {
@@ -149,7 +152,7 @@ public class FamilyService(
         return result;
     }
 
-    public async Task<string> InviteAsync()
+    public async Task<string> InviteAsync(string email)
     {
         var userId = _userCtx.UserId;
 
@@ -174,7 +177,39 @@ public class FamilyService(
         await _uow.Links.AddAsync(link);
         await _uow.CommitAsync();
 
-        return $"{_config["App:BaseUrl"]}/invite?code={code}";
+        var inviteUrl = $"{_config["App:BaseUrl"]}/invite?code={code}";
+
+        // 3. email the invitation link to the target user
+        var family = await _uow.Families.GetByIdAsync(familyId);
+        var familyName = string.IsNullOrWhiteSpace(family?.Name) ? "their family" : family!.Name;
+        var inviterName = _userCtx.User.FullName ?? "A HomeLedger user";
+
+        var subject = $"{inviterName} invited you to join {familyName} on HomeLedger";
+        var body =
+            $"<p>{inviterName} invited you to join <strong>{familyName}</strong> on HomeLedger.</p>"
+            + $"<p><a href=\"{inviteUrl}\">Accept the invitation</a></p>"
+            + $"<p>Or copy this link into your browser: {inviteUrl}</p>"
+            + "<p>This link expires in 24 hours and can only be used once.</p>";
+
+        try
+        {
+            await _email.SendAsync(email, subject, body);
+        }
+        catch (Exception ex)
+        {
+            // The invitation is already saved — the creator can still share the
+            // returned link manually, so don't fail the request.
+            _logger.LogError(ex, "Failed to send invitation email to {Email}", email);
+        }
+
+        _logger.LogInformation(
+            "User {UserId} invited {Email} to family {FamilyId}",
+            userId,
+            email,
+            familyId
+        );
+
+        return inviteUrl;
     }
 
     public async Task AcceptInvitationAsync(string code)
