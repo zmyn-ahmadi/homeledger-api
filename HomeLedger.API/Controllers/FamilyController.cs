@@ -70,9 +70,17 @@ public class FamilyController(IFamilyService familyService) : ControllerBase
     }
 
     [HttpPost("invitations")]
-    public async Task<ActionResult<string>> CreateInvitation()
+    public async Task<ActionResult<string>> CreateInvitation(
+        [FromBody] CreateInvitationDTO createInvitation
+    )
     {
-        var link = await _service.InviteAsync();
+        if (createInvitation == null)
+            return BadRequest("Request body is missing or invalid");
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var link = await _service.InviteAsync(createInvitation.Email);
         return Ok(link);
     }
 

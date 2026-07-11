@@ -56,7 +56,9 @@ public class UserServices(IUnitOfWork _uow, UserMapper mapper, ILogger<UserServi
         if (existingUser != null)
         {
             _logger.LogWarning("User: {Email} already exists", email);
-            throw new Exception($"User '{request.Email}' already exists.");
+            // InvalidOperationException surfaces as a 400 with this message, so
+            // the client can show it instead of a generic 500.
+            throw new InvalidOperationException($"User '{request.Email}' already exists.");
         }
 
         var newUser = _mapper.ToEntity(request);

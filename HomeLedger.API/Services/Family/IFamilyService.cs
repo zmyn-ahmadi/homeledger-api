@@ -14,7 +14,7 @@ public interface IFamilyService
     Task<FamilyDTO> AddAsync(CreateFamilyDTO dto);
     Task<FamilyDTO?> UpdateAsync(int id, UpdateFamilyDTO dto);
     Task<bool> DeleteAsync(int id);
-    Task<string> InviteAsync();
+    Task<string> InviteAsync(string email);
     Task AcceptInvitationAsync(string code);
     Task<int?> GetCurrentUserFamilyIdAsync();
 

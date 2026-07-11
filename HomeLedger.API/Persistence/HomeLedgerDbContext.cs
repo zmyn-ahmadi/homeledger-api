@@ -18,6 +18,7 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<WorkDays> WorkDays { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -523,6 +524,28 @@ public class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> options) 
                 })
                 .IsUnique()
                 .HasDatabaseName("uq_transaction");
+        });
+
+        // WorkDays Configuration
+        modelBuilder.Entity<WorkDays>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.WeekStartDate).IsRequired();
+
+            entity.Property(e => e.DaysWorked).IsRequired();
+
+            entity
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // One record per user per week
+            entity
+                .HasIndex(e => new { e.OwnerId, e.WeekStartDate })
+                .IsUnique()
+                .HasDatabaseName("IX_WorkDays_Owner_Week");
         });
 
         // RefreshToken Configuration

@@ -5,10 +5,12 @@ using HomeLedger.API.Persistence;
 using HomeLedger.API.Services.BillPayments;
 using HomeLedger.API.Services.Categories;
 using HomeLedger.API.Services.Correlation;
+using HomeLedger.API.Services.Email;
 using HomeLedger.API.Services.Family;
 using HomeLedger.API.Services.Incomes;
 using HomeLedger.API.Services.Token;
 using HomeLedger.API.Services.Users;
+using HomeLedger.API.Services.WorkDays;
 using HomeLedger.API.Utils.UserContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Infrastructure;
@@ -178,6 +180,7 @@ builder.Services.AddSingleton<ExpenseMapper>();
 builder.Services.AddSingleton<IncomeMapper>();
 builder.Services.AddSingleton<UserMapper>();
 builder.Services.AddSingleton<FamilyMapper>();
+builder.Services.AddSingleton<WorkDaysMapper>();
 
 // ----------------------------------------------
 // Services
@@ -191,6 +194,8 @@ builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
+builder.Services.AddScoped<IWorkDaysService, WorkDaysService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // ----------------------------------------------
 // Allow services to access HttpContext (used for CorrelationId, etc.
@@ -252,6 +257,7 @@ app.UseExceptionHandler(errorApp =>
         {
             KeyNotFoundException => (404, "Not Found"),
             ArgumentException => (400, ex.Message),
+            InvalidOperationException => (400, ex.Message),
             _ => (500, "Internal server error"),
         };
 
