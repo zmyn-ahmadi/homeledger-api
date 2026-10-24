@@ -64,3 +64,4 @@ local.settings.json
 # migrations files
 Migrations/
 MigrationScript.sql
+!appsettings.example.json
