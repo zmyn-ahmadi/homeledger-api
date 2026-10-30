@@ -55,6 +55,6 @@ Run the tests from the repo root with `dotnet test`.
 
 ## Known limits
 
-- Test coverage is small: one unit test and one smoke test so far.
+- Test coverage is small, and the integration smoke test needs a `DefaultConnection` value, so it fails on a clean checkout.
 - Basiq and email need your own credentials, so they're off in the Docker demo.
 - EF Core migrations aren't in this repo. The Docker demo builds the schema directly from the model, so a real deployment needs migrations generated first.
