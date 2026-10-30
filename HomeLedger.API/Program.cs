@@ -221,6 +221,11 @@ builder.Logging.AddDebug();
 var app = builder.Build();
 Console.WriteLine("App built...");
 
+if (app.Configuration.GetValue<bool>("Demo:Enabled"))
+{
+    await DemoSeeder.RunAsync(app.Services);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

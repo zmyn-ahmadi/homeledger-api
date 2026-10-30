@@ -1,0 +1,51 @@
+# Local demo: runs the API, database and web client with an invented household.
+# These values are for local use only. Never reuse them on a real deployment.
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: homeledger
+      POSTGRES_PASSWORD: local-demo-only
+      POSTGRES_DB: homeledger
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeledger -d homeledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./HomeLedger.API
+    environment:
+      ASPNETCORE_URLS: http://+:5265
+      Demo__Enabled: "true"
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=homeledger;Username=homeledger;Password=local-demo-only
+      Jwt__Key: local-demo-only-signing-key-not-for-real-use-0123456789
+      Jwt__Issuer: HomeLedgerAPI
+      Jwt__Audience: HomeLedgerClient
+      Jwt__DurationInMinutes: "60"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ${CLIENT_SOURCE:-https://github.com/zmyn-ahmadi/homeledger-client.git}
+      args:
+        # Optional: any OpenAI-compatible server. The chat page needs one, the rest of the app doesn't.
+        NEXT_PUBLIC_BASE_LLM_URL: ${LLM_URL:-http://localhost:11434/v1}
+        NEXT_PUBLIC_MODEL: ${LLM_MODEL:-gemma2}
+        NEXT_PUBLIC_MAX_TOKENS: ${LLM_MAX_TOKENS:-512}
+    environment:
+      API_URL: http://backend:5265
+      JWT_SECRET: local-demo-only-signing-key-not-for-real-use-0123456789
+      JWT_ISSUER: HomeLedgerAPI
+      JWT_AUDIENCE: HomeLedgerClient
+    ports:
+      - "${HOMELEDGER_PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
